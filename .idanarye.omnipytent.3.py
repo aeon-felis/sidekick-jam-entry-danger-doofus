@@ -25,6 +25,17 @@ def run(ctx):
 
 
 @task
+def go(ctx):
+    cargo['run'][
+        '--features', 'bevy/dynamic',
+        '--', '--editor',
+    ].with_env(
+        RUST_LOG='danger_doofus=info',
+        RUST_BACKTRACE='1',
+    ) & TERMINAL_PANEL.size(20)
+
+
+@task
 def clean(ctx):
     cargo['clean'] & BANG
 

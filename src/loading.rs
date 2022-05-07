@@ -11,7 +11,10 @@ impl Plugin for LoadingPlugin {
 }
 
 #[derive(AssetCollection)]
-pub struct GraphicAssets {}
+pub struct GraphicAssets {
+    #[asset(path = "sprites/floor-block.png")]
+    pub floor_block: Handle<Image>,
+}
 
 #[derive(AssetCollection)]
 pub struct FontAssets {
