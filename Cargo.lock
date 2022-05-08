@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "bevy-yoleck"
 version = "0.1.0"
-source = "git+https://github.com/idanarye/bevy-yoleck.git#809bbf9d6a6a5415db6a6c79f814aacf04857a44"
+source = "git+https://github.com/idanarye/bevy-yoleck.git#f0b5107de9868d30be3f3ce09a9e933cfb1f2c6d"
 dependencies = [
  "anyhow",
  "bevy",
