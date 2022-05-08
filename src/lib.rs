@@ -23,7 +23,7 @@ impl Plugin for GamePlugin {
         app.add_state(AppState::Menu(MenuState::Main));
         app.add_plugin(LoadingPlugin);
         app.add_plugin(CameraPlugin);
-        app.insert_resource(YoleckTypeHandlers::new([arena::Floor::handler("Floor")]));
+        app.insert_resource(YoleckTypeHandlers::new([arena::Block::handler("Block")]));
         app.add_system(enable_disable_physics);
         if !self.is_editor {
             app.add_startup_system(

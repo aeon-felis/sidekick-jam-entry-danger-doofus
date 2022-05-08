@@ -12,7 +12,7 @@ impl Plugin for ArenaPlugin {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Floor {
+pub struct Block {
     #[serde(default)]
     position: Vec2,
     #[serde(default = "the_fucking_number_one_why_cant_serde_accept_literals")]
@@ -27,7 +27,7 @@ fn the_fucking_number_one_why_cant_serde_accept_literals() -> usize {
     1
 }
 
-impl YoleckSource for Floor {
+impl YoleckSource for Block {
     fn populate(&self, ctx: &bevy_yoleck::YoleckPopulateContext, cmd: &mut EntityCommands) {
         let tile_size = Vec2::new(1.0, 1.0);
         let size = Vec2::new(
