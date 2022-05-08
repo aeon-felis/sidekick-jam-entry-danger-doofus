@@ -1,7 +1,9 @@
 mod arena;
 mod camera;
+mod doofus;
 mod global_types;
 mod loading;
+mod yoleck_utils;
 
 use crate::loading::LoadingPlugin;
 
@@ -23,7 +25,10 @@ impl Plugin for GamePlugin {
         app.add_state(AppState::Menu(MenuState::Main));
         app.add_plugin(LoadingPlugin);
         app.add_plugin(CameraPlugin);
-        app.insert_resource(YoleckTypeHandlers::new([arena::Block::handler("Block")]));
+        app.insert_resource(YoleckTypeHandlers::new([
+            arena::Block::handler("Block"),
+            doofus::Doofus::handler("Doofus"),
+        ]));
         app.add_system(enable_disable_physics);
         if !self.is_editor {
             app.add_startup_system(

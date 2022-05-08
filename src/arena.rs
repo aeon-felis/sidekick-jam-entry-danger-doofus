@@ -5,6 +5,8 @@ use bevy_yoleck::{egui, YoleckSource};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
+
 struct ArenaPlugin;
 
 impl Plugin for ArenaPlugin {
@@ -29,14 +31,12 @@ fn the_fucking_number_one_why_cant_serde_accept_literals() -> usize {
 
 impl YoleckSource for Block {
     fn populate(&self, ctx: &bevy_yoleck::YoleckPopulateContext, cmd: &mut EntityCommands) {
-        let tile_size = Vec2::new(1.0, 1.0);
         let size = Vec2::new(
-            self.width as f32 * tile_size.x,
-            self.height as f32 * tile_size.y,
+            self.width as f32 * GRANULARITY,
+            self.height as f32 * GRANULARITY,
         );
-        let center = self.position + 0.5 * size;
         cmd.insert_bundle(SpriteBundle {
-            transform: Transform::from_translation(center.extend(0.0)),
+            transform: position_to_transform(self.position, self.width, self.height),
             sprite: Sprite {
                 color: Color::NONE,
                 custom_size: Some(size),
@@ -45,23 +45,23 @@ impl YoleckSource for Block {
             ..Default::default()
         });
         cmd.insert(RigidBody::Fixed);
-        cmd.insert(Collider::cuboid(0.5, 0.5));
+        cmd.insert(Collider::cuboid(0.5 * size.x, 0.5 * size.y));
 
         if ctx.is_first_time() || self.prev_dimenstions != [self.width, self.height] {
             cmd.despawn_descendants();
             cmd.with_children(|commands| {
-                let first_tile_center = 0.5 * (-size + tile_size);
+                let first_tile_center = 0.5 * (-size + Vec2::ONE * GRANULARITY);
                 for (w, h) in (0..self.width).cartesian_product(0..self.height) {
                     commands.spawn_bundle(SpriteBundle {
                         transform: {
                             Transform::from_xyz(
-                                first_tile_center.x + w as f32 * tile_size.x,
-                                first_tile_center.y + h as f32 * tile_size.y,
+                                first_tile_center.x + w as f32 * GRANULARITY,
+                                first_tile_center.y + h as f32 * GRANULARITY,
                                 0.0,
                             )
                         },
                         sprite: Sprite {
-                            custom_size: Some(tile_size),
+                            custom_size: Some(Vec2::ONE * GRANULARITY),
                             ..Default::default()
                         },
                         texture: ctx.asset_server.load("sprites/block-tile.png"),
@@ -73,11 +73,7 @@ impl YoleckSource for Block {
     }
 
     fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut egui::Ui) {
-        if let Some(pos) = ctx.get_passed_data::<Vec2>() {
-            let pos = *pos;
-            let pos = pos - 0.5 * Vec2::new(self.width as f32, self.height as f32);
-            *self.position = *round_vec2_to_tick(pos, 1.0);
-        }
+        position_edit(ctx, ui, &mut self.position, self.width, self.height);
         self.prev_dimenstions = [self.width, self.height];
         ui.horizontal(|ui| {
             for (caption, value) in [("Width:", &mut self.width), ("Height:", &mut self.height)] {
@@ -85,12 +81,4 @@ impl YoleckSource for Block {
             }
         });
     }
-}
-
-pub fn round_to_tick(number: f32, tick: f32) -> f32 {
-    (number / tick).round() * tick
-}
-
-pub fn round_vec2_to_tick(vec: Vec2, tick: f32) -> Vec2 {
-    Vec2::new(round_to_tick(vec.x, tick), round_to_tick(vec.y, tick))
 }
