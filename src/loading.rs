@@ -12,8 +12,8 @@ impl Plugin for LoadingPlugin {
 
 #[derive(AssetCollection)]
 pub struct GraphicAssets {
-    #[asset(path = "sprites/floor-block.png")]
-    pub floor_block: Handle<Image>,
+    #[asset(path = "sprites/block-tile.png")]
+    pub block_tile: Handle<Image>,
 }
 
 #[derive(AssetCollection)]
