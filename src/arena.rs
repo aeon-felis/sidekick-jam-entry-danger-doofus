@@ -5,6 +5,7 @@ use bevy_yoleck::{egui, YoleckSource};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::global_types::IsPlatform;
 use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
 
 struct ArenaPlugin;
@@ -46,6 +47,7 @@ impl YoleckSource for Block {
         });
         cmd.insert(RigidBody::Fixed);
         cmd.insert(Collider::cuboid(0.5 * size.x, 0.5 * size.y));
+        cmd.insert(IsPlatform);
 
         if ctx.is_first_time() || self.prev_dimenstions != [self.width, self.height] {
             cmd.despawn_descendants();

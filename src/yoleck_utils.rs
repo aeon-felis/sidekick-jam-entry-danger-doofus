@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_yoleck::egui;
 
+use crate::global_types::Facing;
+
 pub const GRANULARITY: f32 = 1.0;
 
 pub fn round_to_tick(number: f32, tick: f32) -> f32 {
@@ -44,4 +46,12 @@ pub fn position_to_transform(position: Vec2, width: usize, height: usize) -> Tra
         position.y + 0.5 * GRANULARITY * height as f32,
         0.0,
     )
+}
+
+pub fn facing_edit(ui: &mut egui::Ui, facing: &mut Facing) {
+    ui.horizontal(|ui| {
+        ui.label("Facing:");
+        ui.selectable_value(facing, Facing::Left, "<-");
+        ui.selectable_value(facing, Facing::Right, "->");
+    });
 }

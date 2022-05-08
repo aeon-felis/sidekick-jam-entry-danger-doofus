@@ -1,8 +1,10 @@
+mod animation_helpers;
 mod arena;
 mod camera;
 mod doofus;
 mod global_types;
 mod loading;
+mod utils;
 mod yoleck_utils;
 
 use crate::loading::LoadingPlugin;
@@ -13,7 +15,9 @@ use bevy::prelude::*;
 use bevy_rapier2d::plugin::RapierConfiguration;
 use bevy_yoleck::{YoleckEditorState, YoleckLoadingCommand, YoleckSource, YoleckTypeHandlers};
 
+use self::animation_helpers::AnimationHelpersPlugin;
 use self::camera::CameraPlugin;
+use self::doofus::DoofusPlugin;
 use self::global_types::{AppState, MenuState};
 
 pub struct GamePlugin {
@@ -22,15 +26,26 @@ pub struct GamePlugin {
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(AppState::Menu(MenuState::Main));
-        app.add_plugin(LoadingPlugin);
-        app.add_plugin(CameraPlugin);
+        if false {
+            app.add_state(AppState::Menu(MenuState::Main));
+        }
+        if self.is_editor {
+            app.add_state(AppState::Editor);
+        } else {
+            app.add_state(AppState::Game);
+        }
         app.insert_resource(YoleckTypeHandlers::new([
             arena::Block::handler("Block"),
             doofus::Doofus::handler("Doofus"),
         ]));
+        app.add_plugin(LoadingPlugin);
+        app.add_plugin(CameraPlugin);
+        app.add_plugin(AnimationHelpersPlugin);
+        app.add_plugin(DoofusPlugin);
         app.add_system(enable_disable_physics);
-        if !self.is_editor {
+        if self.is_editor {
+            app.add_system(set_app_state_based_on_editor_state);
+        } else {
             app.add_startup_system(
                 |asset_server: Res<AssetServer>,
                  mut yoleck_loading_command: ResMut<YoleckLoadingCommand>| {
@@ -40,6 +55,16 @@ impl Plugin for GamePlugin {
             );
         }
     }
+}
+
+fn set_app_state_based_on_editor_state(
+    yoleck_editor_state: Res<State<YoleckEditorState>>,
+    mut app_state: ResMut<State<AppState>>,
+) {
+    let _ = app_state.set(match yoleck_editor_state.current() {
+        YoleckEditorState::EditorActive => AppState::Editor,
+        YoleckEditorState::GameActive => AppState::Game,
+    });
 }
 
 fn enable_disable_physics(
