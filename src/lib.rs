@@ -3,11 +3,11 @@ mod arena;
 mod camera;
 mod doofus;
 mod global_types;
+mod ina;
 mod loading;
+mod player_control;
 mod utils;
 mod yoleck_utils;
-mod ina;
-mod player_control;
 
 use crate::loading::LoadingPlugin;
 

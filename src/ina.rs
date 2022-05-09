@@ -11,8 +11,7 @@ use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
 pub struct InaPlugin;
 
 impl Plugin for InaPlugin {
-    fn build(&self, _app: &mut App) {
-    }
+    fn build(&self, _app: &mut App) {}
 }
 
 #[derive(Serialize, Deserialize)]

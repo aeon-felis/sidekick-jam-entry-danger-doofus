@@ -60,11 +60,7 @@ struct PlayerMovementSettings {
 fn control_player(
     time: Res<Time>,
     input: Res<Input<KeyCode>>,
-    mut query: Query<(
-        Entity,
-        &mut Velocity,
-        &mut PlayerControl,
-    )>,
+    mut query: Query<(Entity, &mut Velocity, &mut PlayerControl)>,
     player_movement_settings: Res<PlayerMovementSettings>,
     rapier_context: Res<RapierContext>,
 ) {
@@ -81,15 +77,18 @@ fn control_player(
             .contacts_with(player_entity)
             .filter(|contact| contact.raw.has_any_active_contact)
             .filter_map(|contact| {
-                contact.manifolds().filter_map(|contact_manifold| {
-                    if contact.collider1() == player_entity {
-                        Some(-contact_manifold.normal())
-                    } else if contact.collider2() == player_entity {
-                        Some(contact_manifold.normal())
-                    } else {
-                        None
-                    }
-                }).max_by_key(|normal| float_ord::FloatOrd(normal.dot(Vec2::Y)))
+                contact
+                    .manifolds()
+                    .filter_map(|contact_manifold| {
+                        if contact.collider1() == player_entity {
+                            Some(-contact_manifold.normal())
+                        } else if contact.collider2() == player_entity {
+                            Some(contact_manifold.normal())
+                        } else {
+                            None
+                        }
+                    })
+                    .max_by_key(|normal| float_ord::FloatOrd(normal.dot(Vec2::Y)))
             })
             .max_by_key(|normal| float_ord::FloatOrd(normal.dot(Vec2::Y)));
 
