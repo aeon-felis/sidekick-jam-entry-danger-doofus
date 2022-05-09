@@ -49,4 +49,7 @@ impl Facing {
 pub struct IsDoofus;
 
 #[derive(Component)]
+pub struct IsIna;
+
+#[derive(Component)]
 pub struct IsPlatform;

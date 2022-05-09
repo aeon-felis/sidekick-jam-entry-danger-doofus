@@ -6,6 +6,7 @@ mod global_types;
 mod loading;
 mod utils;
 mod yoleck_utils;
+mod ina;
 
 use crate::loading::LoadingPlugin;
 
@@ -19,6 +20,7 @@ use self::animation_helpers::AnimationHelpersPlugin;
 use self::camera::CameraPlugin;
 use self::doofus::DoofusPlugin;
 use self::global_types::{AppState, MenuState};
+use self::ina::InaPlugin;
 
 pub struct GamePlugin {
     pub is_editor: bool,
@@ -37,11 +39,13 @@ impl Plugin for GamePlugin {
         app.insert_resource(YoleckTypeHandlers::new([
             arena::Block::handler("Block"),
             doofus::Doofus::handler("Doofus"),
+            ina::Ina::handler("Ina"),
         ]));
         app.add_plugin(LoadingPlugin);
         app.add_plugin(CameraPlugin);
         app.add_plugin(AnimationHelpersPlugin);
         app.add_plugin(DoofusPlugin);
+        app.add_plugin(InaPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
             app.add_system(set_app_state_based_on_editor_state);
