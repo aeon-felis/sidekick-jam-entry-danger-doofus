@@ -18,7 +18,8 @@ impl Plugin for MenuPlugin {
             SystemSet::on_update(AppState::Menu(MenuState::Main)).with_system(main_menu),
         );
         app.add_system_set(
-            SystemSet::on_update(AppState::Menu(MenuState::LevelSelect)).with_system(level_select_menu),
+            SystemSet::on_update(AppState::Menu(MenuState::LevelSelect))
+                .with_system(level_select_menu),
         );
         app.add_system_set(
             SystemSet::on_update(AppState::Menu(MenuState::Pause)).with_system(pause_menu),
@@ -97,10 +98,13 @@ fn level_select_menu(
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
         }
-        for (level_caption, level_file) in [
-            ("Level 1", "levels/level-01.yol"),
-        ] {
-            if ui.button(level_caption).kbgp_navigation().kbgp_initial_focus().clicked() {
+        for (level_caption, level_file) in [("Level 1", "levels/level-01.yol")] {
+            if ui
+                .button(level_caption)
+                .kbgp_navigation()
+                .kbgp_initial_focus()
+                .clicked()
+            {
                 current_level.0 = Some(level_file.to_owned());
                 state.set(AppState::LoadLevel).unwrap();
             }
@@ -124,11 +128,7 @@ fn pause_menu(
         {
             state.set(AppState::Game).unwrap();
         }
-        if ui
-            .button("Retry")
-            .kbgp_navigation()
-            .clicked()
-        {
+        if ui.button("Retry").kbgp_navigation().clicked() {
             state.set(AppState::LoadLevel).unwrap();
         }
         if ui.button("Main Menu").kbgp_navigation().clicked() {

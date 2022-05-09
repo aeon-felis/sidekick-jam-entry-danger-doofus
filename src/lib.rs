@@ -6,10 +6,10 @@ mod global_types;
 mod ina;
 mod input;
 mod loading;
+mod menu;
 mod player_control;
 mod utils;
 mod yoleck_utils;
-mod menu;
 
 use crate::loading::LoadingPlugin;
 
@@ -17,12 +17,14 @@ use bevy::app::App;
 #[cfg(debug_assertions)]
 use bevy::prelude::*;
 use bevy_rapier2d::plugin::RapierConfiguration;
-use bevy_yoleck::{YoleckEditorState, YoleckSource, YoleckTypeHandlers, YoleckLoadingCommand, YoleckManaged};
+use bevy_yoleck::{
+    YoleckEditorState, YoleckLoadingCommand, YoleckManaged, YoleckSource, YoleckTypeHandlers,
+};
 
 use self::animation_helpers::AnimationHelpersPlugin;
 use self::camera::CameraPlugin;
 use self::doofus::DoofusPlugin;
-use self::global_types::{AppState, MenuState, CurrentLevel};
+use self::global_types::{AppState, CurrentLevel, MenuState};
 use self::ina::InaPlugin;
 use self::input::GameInputPlugin;
 use self::menu::MenuPlugin;
@@ -30,13 +32,18 @@ use self::player_control::PlayerControlPlugin;
 
 pub struct GamePlugin {
     pub is_editor: bool,
+    pub start_at_level: Option<String>,
 }
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         if self.is_editor {
             app.add_state(AppState::Editor);
+        } else if let Some(start_at_level) = &self.start_at_level {
+            app.insert_resource(CurrentLevel(Some(format!("levels/{}.yol", start_at_level))));
+            app.add_state(AppState::LoadLevel);
         } else {
+            app.insert_resource(CurrentLevel(None));
             app.add_state(AppState::Menu(MenuState::Main));
         }
         app.insert_resource(YoleckTypeHandlers::new([
@@ -45,7 +52,6 @@ impl Plugin for GamePlugin {
             ina::Ina::handler("Ina"),
         ]));
         if !self.is_editor {
-            app.insert_resource(CurrentLevel(None));
             app.add_plugin(MenuPlugin);
         }
         app.add_plugin(LoadingPlugin);
@@ -59,7 +65,9 @@ impl Plugin for GamePlugin {
         if self.is_editor {
             app.add_system(set_app_state_based_on_editor_state);
         } else {
-            app.add_system_set(SystemSet::on_enter(AppState::LoadLevel).with_system(handle_level_loading));
+            app.add_system_set(
+                SystemSet::on_enter(AppState::LoadLevel).with_system(handle_level_loading),
+            );
         }
     }
 }
@@ -92,7 +100,10 @@ fn handle_level_loading(
     for entity in level_entities_query.iter() {
         commands.entity(entity).despawn_recursive();
     }
-    let current_level = current_level.0.as_ref().expect("Entered LoadLevel state when current_level is None");
+    let current_level = current_level
+        .0
+        .as_ref()
+        .expect("Entered LoadLevel state when current_level is None");
     *yoleck_loading_command = YoleckLoadingCommand::FromAsset(asset_server.load(current_level));
     state.set(AppState::Game).unwrap();
 }

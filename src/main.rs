@@ -3,12 +3,22 @@
 
 use bevy::prelude::{App, ClearColor, Color, Msaa, WindowDescriptor};
 use bevy::DefaultPlugins;
-use bevy_egui_kbgp::{KbgpSettings, KbgpPlugin, KbgpNavBindings};
+use bevy_egui_kbgp::{KbgpNavBindings, KbgpPlugin, KbgpSettings};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
+use clap::Parser;
 use danger_doofus::GamePlugin;
 
+#[derive(Parser, Debug)]
+struct Args {
+    #[clap(long)]
+    editor: bool,
+    #[clap(long)]
+    level: Option<String>,
+}
+
 fn main() {
-    let is_editor = std::env::args().any(|arg| arg == "--editor");
+    let args = Args::parse();
+
     let mut app = App::new();
     app.insert_resource(Msaa { samples: 1 });
     app.insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)));
@@ -20,7 +30,7 @@ fn main() {
     });
     app.add_plugins(DefaultPlugins);
     app.add_plugin(bevy_yoleck::bevy_egui::EguiPlugin);
-    if is_editor {
+    if args.editor {
         app.add_plugin(bevy_yoleck::YoleckPluginForEditor);
         app.add_plugin(bevy_yoleck::tools_2d::YoleckTools2dPlugin);
     } else {
@@ -43,7 +53,10 @@ fn main() {
             bindings: KbgpNavBindings::default().with_wasd_navigation(),
         });
     }
-    app.add_plugin(GamePlugin { is_editor });
+    app.add_plugin(GamePlugin {
+        is_editor: args.editor,
+        start_at_level: args.level,
+    });
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0));
     app.run();
 }

@@ -43,6 +43,7 @@ ezinput = { git = "https://github.com/idanarye/ezinput.git" }
 ezinput_macros = "0.2.0"
 bevy-egui-kbgp = "0.6.0"
 bevy_egui = "0.14.0"
+clap = { version = "3.1.17", features = ["derive"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "0.25", features=["x11"]}

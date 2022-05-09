@@ -24,6 +24,24 @@ def run(ctx):
     ) & TERMINAL_PANEL.size(20)
 
 
+@task.options(alias=':0')
+def level(ctx):
+    ctx.key(str)
+    for level in local.path('assets/levels'):
+        yield level.with_suffix('').basename
+
+
+@task
+def execute(ctx, level=level):
+    cargo['run'][
+        '--features', 'bevy/dynamic',
+        '--', '--level', level,
+    ].with_env(
+        RUST_LOG='danger_doofus=info,bevy_yoleck=info',
+        RUST_BACKTRACE='1',
+    ) & TERMINAL_PANEL.size(20)
+
+
 @task
 def go(ctx):
     cargo['run'][
