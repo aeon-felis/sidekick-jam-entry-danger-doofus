@@ -1,7 +1,8 @@
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
+use bevy_egui::egui;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{egui, YoleckSource};
+use bevy_yoleck::YoleckSource;
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, Facing, IsDoofus, IsPlatform};

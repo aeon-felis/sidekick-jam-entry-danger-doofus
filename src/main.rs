@@ -3,6 +3,7 @@
 
 use bevy::prelude::{App, ClearColor, Color, Msaa, WindowDescriptor};
 use bevy::DefaultPlugins;
+use bevy_egui_kbgp::{KbgpSettings, KbgpPlugin, KbgpNavBindings};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use danger_doofus::GamePlugin;
 
@@ -24,6 +25,23 @@ fn main() {
         app.add_plugin(bevy_yoleck::tools_2d::YoleckTools2dPlugin);
     } else {
         app.add_plugin(bevy_yoleck::YoleckPluginForGame);
+        app.insert_resource(bevy_egui::EguiSettings {
+            scale_factor: 2.0,
+            default_open_url_target: None,
+        });
+        app.add_plugin(KbgpPlugin);
+        app.insert_resource(KbgpSettings {
+            disable_default_navigation: true,
+            disable_default_activation: false,
+            prevent_loss_of_focus: true,
+            focus_on_mouse_movement: true,
+            allow_keyboard: true,
+            allow_mouse_buttons: false,
+            allow_mouse_wheel: false,
+            allow_mouse_wheel_sideways: false,
+            allow_gamepads: true,
+            bindings: KbgpNavBindings::default().with_wasd_navigation(),
+        });
     }
     app.add_plugin(GamePlugin { is_editor });
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0));

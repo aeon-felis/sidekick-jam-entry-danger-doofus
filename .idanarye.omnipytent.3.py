@@ -19,7 +19,7 @@ def run(ctx):
     cargo['run'][
         '--features', 'bevy/dynamic',
     ].with_env(
-        RUST_LOG='danger_doofus=info',
+        RUST_LOG='danger_doofus=info,bevy_yoleck=info',
         RUST_BACKTRACE='1',
     ) & TERMINAL_PANEL.size(20)
 

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_yoleck::egui;
+use bevy_egui::egui;
 
 use crate::global_types::Facing;
 

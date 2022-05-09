@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub enum AppState {
     Menu(MenuState),
     // ClearLevelAndThenLoad,
-    // LoadLevel,
+    LoadLevel,
     Game,
     Editor,
 }
@@ -15,9 +15,13 @@ pub enum AppState {
 #[derive(Clone, Hash, Debug, PartialEq, Eq)]
 pub enum MenuState {
     Main,
-    // Pause,
-    // GameOver,
+    LevelSelect,
+    Pause,
+    GameOver,
 }
+
+#[derive(Component)]
+pub struct CurrentLevel(pub Option<String>);
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum InputBinding {
