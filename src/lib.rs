@@ -7,6 +7,7 @@ mod loading;
 mod utils;
 mod yoleck_utils;
 mod ina;
+mod player_control;
 
 use crate::loading::LoadingPlugin;
 
@@ -21,6 +22,7 @@ use self::camera::CameraPlugin;
 use self::doofus::DoofusPlugin;
 use self::global_types::{AppState, MenuState};
 use self::ina::InaPlugin;
+use self::player_control::PlayerControlPlugin;
 
 pub struct GamePlugin {
     pub is_editor: bool,
@@ -46,6 +48,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(AnimationHelpersPlugin);
         app.add_plugin(DoofusPlugin);
         app.add_plugin(InaPlugin);
+        app.add_plugin(PlayerControlPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
             app.add_system(set_app_state_based_on_editor_state);

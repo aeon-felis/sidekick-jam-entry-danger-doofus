@@ -1330,6 +1330,7 @@ dependencies = [
  "bevy_kira_audio",
  "bevy_rapier2d",
  "embed-resource",
+ "float-ord",
  "itertools",
  "rand",
  "serde",
@@ -1574,6 +1575,12 @@ name = "fixedbitset"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
+
+[[package]]
+name = "float-ord"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ce81f49ae8a0482e4c55ea62ebbd7e5a686af544c00b9d090bba3ff9be97b3d"
 
 [[package]]
 name = "fnv"

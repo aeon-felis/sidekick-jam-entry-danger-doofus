@@ -5,6 +5,7 @@ use bevy_yoleck::{egui, YoleckSource};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsIna;
+use crate::player_control::PlayerControl;
 use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
 
 pub struct InaPlugin;
@@ -38,6 +39,7 @@ impl YoleckSource for Ina {
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
         cmd.insert(Velocity::default());
         cmd.insert(LockedAxes::ROTATION_LOCKED);
+        cmd.insert(PlayerControl::default());
     }
 
     fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut egui::Ui) {
