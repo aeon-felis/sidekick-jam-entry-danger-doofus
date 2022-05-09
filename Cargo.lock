@@ -1435,7 +1435,7 @@ dependencies = [
  "clap",
  "embed-resource",
  "ezinput",
- "ezinput_macros 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ezinput_macros",
  "float-ord",
  "itertools",
  "rand",
@@ -1679,11 +1679,12 @@ checksum = "77f3309417938f28bf8228fcff79a4a37103981e3e186d2ccd19c74b38f4eb71"
 
 [[package]]
 name = "ezinput"
-version = "0.2.3"
-source = "git+https://github.com/idanarye/ezinput.git#5d22a327a547054700ef1a670d3d078a0fbb423e"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d62d18a9676d7aee058c14fdf7cfc05cb63922b963e08a949bc6e48a0d0b6180"
 dependencies = [
  "bevy",
- "ezinput_macros 0.2.0 (git+https://github.com/idanarye/ezinput.git)",
+ "ezinput_macros",
  "serde",
  "strum",
  "strum_macros",
@@ -1694,15 +1695,6 @@ name = "ezinput_macros"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "233f36f4d4ac26f55d36612a979cd90aca1c1224faf6036277c8d6a936e51e86"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
-name = "ezinput_macros"
-version = "0.2.0"
-source = "git+https://github.com/idanarye/ezinput.git#5d22a327a547054700ef1a670d3d078a0fbb423e"
 dependencies = [
  "quote",
  "syn",

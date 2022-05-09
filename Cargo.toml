@@ -39,7 +39,7 @@ serde = "1.0.137"
 bevy_rapier2d = "0.13.2"
 itertools = "0.10.3"
 float-ord = "0.3.2"
-ezinput = { git = "https://github.com/idanarye/ezinput.git" }
+ezinput = "0.2.4"
 ezinput_macros = "0.2.0"
 bevy-egui-kbgp = "0.6.0"
 bevy_egui = "0.14.0"
