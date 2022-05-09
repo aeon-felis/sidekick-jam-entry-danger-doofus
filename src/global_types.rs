@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use ezinput::prelude::BindingTypeView;
+use ezinput_macros::BindingTypeView;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Hash, Debug, PartialEq, Eq)]
@@ -15,6 +17,13 @@ pub enum MenuState {
     Main,
     // Pause,
     // GameOver,
+}
+
+#[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum InputBinding {
+    MoveHorizontal,
+    Jump,
+    Pause,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Component, Serialize, Deserialize)]

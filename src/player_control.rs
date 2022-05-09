@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use ezinput::prelude::*;
 
-use crate::global_types::AppState;
+use crate::global_types::{AppState, InputBinding};
 
 pub struct PlayerControlPlugin;
 
@@ -59,19 +60,35 @@ struct PlayerMovementSettings {
 
 fn control_player(
     time: Res<Time>,
-    input: Res<Input<KeyCode>>,
+    input_views: Query<&InputView<InputBinding>>,
     mut query: Query<(Entity, &mut Velocity, &mut PlayerControl)>,
     player_movement_settings: Res<PlayerMovementSettings>,
     rapier_context: Res<RapierContext>,
 ) {
-    let is_jumping = input.pressed(KeyCode::Up);
-    let mut target_speed: f32 = 0.0;
-    if input.pressed(KeyCode::Left) {
-        target_speed -= 1.0;
+    let mut movement_value = 0.0;
+    let mut num_participating = 0;
+    let mut is_jumping = false;
+    for input_view in input_views.iter() {
+        for axis_value in input_view.axis(&InputBinding::MoveHorizontal) {
+            if !axis_value.1.released() {
+                num_participating += 1;
+                movement_value = axis_value.0
+            }
+        }
+        if matches!(
+            input_view.key(&InputBinding::Jump),
+            PressState::Pressed { .. }
+        ) {
+            is_jumping = true;
+        }
     }
-    if input.pressed(KeyCode::Right) {
-        target_speed += 1.0;
-    }
+    let movement_value = if 0 < num_participating {
+        movement_value / num_participating as f32
+    } else {
+        0.0
+    };
+
+    let target_speed = movement_value;
     for (player_entity, mut velocity, mut player_control) in query.iter_mut() {
         let standing_on = rapier_context
             .contacts_with(player_entity)
