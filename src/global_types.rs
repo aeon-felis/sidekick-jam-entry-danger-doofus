@@ -30,6 +30,7 @@ pub struct LevelProgress {
     pub just_completed: Option<String>,
     pub current_level: Option<String>,
     pub level_index_handle: Handle<YoleckLevelIndex>,
+    pub num_levels_available: usize,
 }
 
 #[derive(Debug)]

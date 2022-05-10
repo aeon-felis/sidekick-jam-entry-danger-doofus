@@ -45,6 +45,8 @@ bevy-egui-kbgp = "0.6.0"
 bevy_egui = "0.14.0"
 clap = { version = "3.1.17", features = ["derive"] }
 bevy_tweening = "0.4.0"
+#bevy_pkv = "0.4.0"
+bevy_pkv = { git = "https://github.com/johanhelsing/bevy_pkv.git", rev = "02c18d117ff7a299ac6e439549aba242b81887bb" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "0.25", features=["x11"]}

@@ -26,7 +26,7 @@ def run(ctx):
     ) & TERMINAL_PANEL.size(20)
 
 
-@task.options(alias=':0')
+@task.options
 def level(ctx):
     ctx.key(lambda level: level['filename'].removesuffix('.yol').replace('_', ' '))
     ctx.value(lambda level: level['filename'].removesuffix('.yol'))
@@ -80,3 +80,9 @@ def browse_wasm(ctx):
 @task
 def clippy(ctx):
     cargo['clippy'] & ERUN.bang
+
+
+@task
+def erase_save(ctx):
+    save_dir = local.path('~/.local/share/dangerdoofus')
+    save_dir.delete()

@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use bevy::DefaultPlugins;
 use bevy_egui_kbgp::KbgpNavCommand;
 use bevy_egui_kbgp::{KbgpNavBindings, KbgpPlugin, KbgpSettings};
+use bevy_pkv::PkvStore;
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use bevy_tweening::TweeningPlugin;
 use clap::Parser;
@@ -33,6 +34,7 @@ fn main() {
     });
     app.add_plugins(DefaultPlugins);
     app.add_plugin(TweeningPlugin);
+    app.insert_resource(PkvStore::new("AeonFelis", "DangerDoofus"));
     app.add_plugin(bevy_yoleck::bevy_egui::EguiPlugin);
     if args.editor {
         app.add_plugin(bevy_yoleck::YoleckPluginForEditor);

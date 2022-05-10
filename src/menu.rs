@@ -134,9 +134,12 @@ fn level_select_menu(
             return);
         for (index, level) in level_index.iter().enumerate() {
             let mut response = ui
-                .button(format_level_name(&level.filename))
+                .add_enabled(
+                    index < level_progress.num_levels_available,
+                    egui::Button::new(format_level_name(&level.filename)),
+                )
                 .kbgp_navigation();
-            if index == level_index.len() - 1 {
+            if index + 1 == level_progress.num_levels_available {
                 response = response.kbgp_focus_label(FocusLabel::NextLevel);
             }
             if Some(&level.filename) == level_progress.current_level.as_ref() {

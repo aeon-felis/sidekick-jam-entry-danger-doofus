@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_pkv::PkvStore;
 use bevy_yoleck::YoleckLevelIndex;
 
 use crate::global_types::{AppState, LevelProgress, MenuState};
@@ -12,8 +13,10 @@ impl Plugin for LevelProgressPlugin {
             just_completed: None,
             current_level: None,
             level_index_handle: Default::default(),
+            num_levels_available: 0,
         });
         app.add_startup_system(setup_level_progress);
+        app.add_system(read_last_finished_level);
         app.add_system_set(
             SystemSet::on_update(AppState::LevelCompleted).with_system(handle_level_completion),
         );
@@ -24,19 +27,61 @@ fn setup_level_progress(asset_server: Res<AssetServer>, mut level_progress: ResM
     level_progress.level_index_handle = asset_server.load("levels/index.yoli");
 }
 
+const LEVEL_PKV_KEY: &str = "completed_up_to_level";
+
+fn read_last_finished_level(
+    pkv: Res<PkvStore>,
+    mut level_progress: ResMut<LevelProgress>,
+    level_index_assets: Res<Assets<YoleckLevelIndex>>,
+) {
+    if 0 < level_progress.num_levels_available {
+        return;
+    }
+    if let Ok(completed_up_to_level) = pkv.get::<String>(LEVEL_PKV_KEY) {
+        let level_index =
+            some_or!(level_index_assets.get(&level_progress.level_index_handle); return);
+        if let Some(index) = level_index.iter().enumerate().find_map(|(index, level)| {
+            if level.filename == completed_up_to_level {
+                Some(index)
+            } else {
+                None
+            }
+        }) {
+            level_progress.num_levels_available = index + 2;
+        } else {
+            error!(
+                "Unable to find level {:?}, starting anew",
+                completed_up_to_level
+            );
+            level_progress.num_levels_available = 1;
+        }
+    } else {
+        level_progress.num_levels_available = 1;
+    }
+}
+
 fn handle_level_completion(
     level_index_assets: Res<Assets<YoleckLevelIndex>>,
+    mut pkv: ResMut<PkvStore>,
     mut level_progress: ResMut<LevelProgress>,
     mut state: ResMut<State<AppState>>,
 ) {
     let level_index = some_or!(level_index_assets.get(&level_progress.level_index_handle); return);
     let mut it = level_index.iter();
+    let completed_level = level_progress
+        .current_level
+        .as_ref()
+        .expect("we just completed it, it cannot be empty");
+    if let Err(err) = pkv.set(LEVEL_PKV_KEY, completed_level) {
+        error!("Cannot save level progression: {}", err);
+    }
     let _current_level = it
         .by_ref()
-        .find(|level| level.filename == *level_progress.current_level.as_ref().unwrap())
+        .find(|level| level.filename == *completed_level)
         .expect("Current level must be in the index");
     level_progress.just_completed = level_progress.current_level.take();
     level_progress.current_level = it.next().map(|level| level.filename.clone());
+    level_progress.num_levels_available = 0;
     state
         .set(AppState::Menu(MenuState::LevelCompleted))
         .unwrap();
