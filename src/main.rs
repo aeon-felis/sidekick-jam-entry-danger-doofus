@@ -1,12 +1,14 @@
 // disable console on windows for release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use bevy::prelude::{App, ClearColor, Color, Msaa, WindowDescriptor};
+use bevy::prelude::*;
 use bevy::DefaultPlugins;
+use bevy_egui_kbgp::KbgpNavCommand;
 use bevy_egui_kbgp::{KbgpNavBindings, KbgpPlugin, KbgpSettings};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use clap::Parser;
 use danger_doofus::GamePlugin;
+use danger_doofus::MenuActionForKbgp;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -50,7 +52,15 @@ fn main() {
             allow_mouse_wheel: false,
             allow_mouse_wheel_sideways: false,
             allow_gamepads: true,
-            bindings: KbgpNavBindings::default().with_wasd_navigation(),
+            bindings: {
+                KbgpNavBindings::default()
+                    .with_wasd_navigation()
+                    .with_key(KeyCode::Escape, KbgpNavCommand::user(MenuActionForKbgp))
+                    .with_gamepad_button(
+                        GamepadButtonType::Start,
+                        KbgpNavCommand::user(MenuActionForKbgp),
+                    )
+            },
         });
     }
     app.add_plugin(GamePlugin {

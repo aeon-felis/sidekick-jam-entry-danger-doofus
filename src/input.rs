@@ -54,14 +54,6 @@ impl Default for InputConfig {
                 ))
         });
 
-        view.add_binding({
-            ActionBinding::from(InputBinding::Pause)
-                .receiver(BindingInputReceiver::KeyboardKey(KeyCode::Escape))
-                .receiver(BindingInputReceiver::GamepadButton(
-                    GamepadButtonType::Start,
-                ))
-        });
-
         Self(view)
     }
 }

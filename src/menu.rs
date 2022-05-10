@@ -3,18 +3,16 @@ use bevy_egui_kbgp::bevy_egui::EguiContext;
 use bevy_egui_kbgp::egui;
 use bevy_egui_kbgp::prelude::*;
 use bevy_yoleck::YoleckLevelIndex;
-use ezinput::prelude::*;
 
 use crate::global_types::CurrentLevel;
-use crate::global_types::InputBinding;
 use crate::global_types::{AppState, MenuState};
 use crate::utils::some_or;
+use crate::MenuActionForKbgp;
 
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<UnpauseEvent>();
         app.add_system(pause_unpause_game);
         app.add_system_set(
             SystemSet::on_update(AppState::Menu(MenuState::Main)).with_system(main_menu),
@@ -32,29 +30,28 @@ impl Plugin for MenuPlugin {
     }
 }
 
-struct UnpauseEvent;
-
-fn pause_unpause_game(
-    input_views: Query<&InputView<InputBinding>>,
-    mut state: ResMut<State<AppState>>,
-    mut unpause_writer: EventWriter<UnpauseEvent>,
-) {
-    if input_views
-        .iter()
-        .any(|view| view.key(&InputBinding::Pause).just_pressed())
-    {
-        match state.current() {
-            AppState::Menu(_) => {
-                unpause_writer.send(UnpauseEvent);
-            }
-            // AppState::ClearLevelAndThenLoad => {}
-            AppState::LoadLevel => {}
-            AppState::Game => {
+fn pause_unpause_game(mut egui_context: ResMut<EguiContext>, mut state: ResMut<State<AppState>>) {
+    match state.current() {
+        AppState::Menu(_) => {}
+        // AppState::ClearLevelAndThenLoad => {}
+        AppState::LoadLevel => {}
+        AppState::Game => {
+            let egui_context = egui_context.ctx_mut();
+            if egui_context.kbgp_user_action() == Some(MenuActionForKbgp) {
                 state.set(AppState::Menu(MenuState::Pause)).unwrap();
+                egui_context.kbgp_clear_input();
             }
-            AppState::Editor => panic!("Menu and editor must not run together"),
         }
+        AppState::Editor => panic!("Menu and editor must not run together"),
     }
+}
+
+#[derive(PartialEq)]
+enum FocusLabel {
+    Start,
+    NextLevel,
+    BackToMainMenu,
+    Exit,
 }
 
 fn menu_layout(egui_context: &egui::Context, dlg: impl FnOnce(&mut egui::Ui)) {
@@ -74,17 +71,27 @@ fn main_menu(
     #[cfg(not(target_arch = "wasm32"))] mut exit: EventWriter<bevy::app::AppExit>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
+        if ui.kbgp_user_action() == Some(MenuActionForKbgp) {
+            ui.kbgp_set_focus_label(FocusLabel::Exit);
+        }
         if ui
             .button("Start")
             .kbgp_navigation()
             .kbgp_initial_focus()
+            .kbgp_focus_label(FocusLabel::Start)
             .clicked()
         {
             state.set(AppState::Menu(MenuState::LevelSelect)).unwrap();
             ui.kbgp_clear_input();
+            ui.kbgp_set_focus_label(FocusLabel::NextLevel);
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("Exit").kbgp_navigation().clicked() {
+        if ui
+            .button("Exit")
+            .kbgp_navigation()
+            .kbgp_focus_label(FocusLabel::Exit)
+            .clicked()
+        {
             exit.send(bevy::app::AppExit);
         }
     });
@@ -99,25 +106,32 @@ fn level_select_menu(
     mut level_index_handle: Local<Option<Handle<YoleckLevelIndex>>>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
-        if ui.button("Back To Menu").kbgp_navigation().clicked() {
+        if ui.kbgp_user_action() == Some(MenuActionForKbgp) {
+            ui.kbgp_set_focus_label(FocusLabel::BackToMainMenu);
+        }
+        if ui
+            .button("Back To Menu")
+            .kbgp_navigation()
+            .kbgp_focus_label(FocusLabel::Exit)
+            .clicked()
+        {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
         }
         let handle =
             level_index_handle.get_or_insert_with(|| asset_server.load("levels/index.yoli"));
         let level_index = some_or!(level_index_assets.get(handle.clone()); return);
-        for level in level_index.iter() {
+        for (index, level) in level_index.iter().enumerate() {
             let caption = level
                 .filename
                 .strip_suffix(".yol")
                 .unwrap_or(&level.filename)
                 .replace('_', " ");
-            if ui
-                .button(caption)
-                .kbgp_navigation()
-                .kbgp_initial_focus()
-                .clicked()
-            {
+            let mut response = ui.button(caption).kbgp_navigation();
+            if index == level_index.len() - 1 {
+                response = response.kbgp_focus_label(FocusLabel::NextLevel);
+            }
+            if response.clicked() {
                 current_level.0 = Some(format!("levels/{}", level.filename));
                 state.set(AppState::LoadLevel).unwrap();
             }
@@ -128,7 +142,6 @@ fn level_select_menu(
 fn pause_menu(
     mut egui_context: ResMut<EguiContext>,
     mut state: ResMut<State<AppState>>,
-    mut unpause_reader: EventReader<UnpauseEvent>,
     #[cfg(not(target_arch = "wasm32"))] mut exit: EventWriter<bevy::app::AppExit>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
@@ -137,7 +150,7 @@ fn pause_menu(
             .kbgp_navigation()
             .kbgp_initial_focus()
             .clicked()
-            || unpause_reader.iter().any(|_| true)
+            || ui.kbgp_user_action() == Some(MenuActionForKbgp)
         {
             state.set(AppState::Game).unwrap();
         }
@@ -147,9 +160,15 @@ fn pause_menu(
         if ui.button("Main Menu").kbgp_navigation().clicked() {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
+            ui.kbgp_set_focus_label(FocusLabel::Start);
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("Exit").kbgp_navigation().clicked() {
+        if ui
+            .button("Exit")
+            .kbgp_navigation()
+            .kbgp_focus_label(FocusLabel::BackToMainMenu)
+            .clicked()
+        {
             exit.send(bevy::app::AppExit);
         }
     });
@@ -161,6 +180,9 @@ fn game_over_menu(
     #[cfg(not(target_arch = "wasm32"))] mut exit: EventWriter<bevy::app::AppExit>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
+        if ui.kbgp_user_action() == Some(MenuActionForKbgp) {
+            ui.kbgp_set_focus_label(FocusLabel::Exit);
+        }
         if ui
             .button("Retry")
             .kbgp_navigation()
@@ -172,9 +194,15 @@ fn game_over_menu(
         if ui.button("Main Menu").kbgp_navigation().clicked() {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
+            ui.kbgp_set_focus_label(FocusLabel::Start);
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("Exit").kbgp_navigation().clicked() {
+        if ui
+            .button("Exit")
+            .kbgp_navigation()
+            .kbgp_focus_label(FocusLabel::Exit)
+            .clicked()
+        {
             exit.send(bevy::app::AppExit);
         }
     });

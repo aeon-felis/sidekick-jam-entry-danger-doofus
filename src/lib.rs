@@ -24,6 +24,7 @@ use bevy_yoleck::{
 use self::animation_helpers::AnimationHelpersPlugin;
 use self::camera::CameraPlugin;
 use self::doofus::DoofusPlugin;
+pub use self::global_types::MenuActionForKbgp;
 use self::global_types::{AppState, CurrentLevel, MenuState};
 use self::ina::InaPlugin;
 use self::input::GameInputPlugin;
