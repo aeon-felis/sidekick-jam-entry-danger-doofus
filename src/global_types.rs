@@ -68,3 +68,6 @@ pub struct IsIna;
 
 #[derive(Component)]
 pub struct IsPlatform;
+
+#[derive(Component)]
+pub struct IsDoor;

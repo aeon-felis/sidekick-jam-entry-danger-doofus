@@ -2,6 +2,7 @@ mod animation_helpers;
 mod arena;
 mod camera;
 mod doofus;
+mod door;
 mod global_types;
 mod ina;
 mod input;
@@ -24,6 +25,7 @@ use bevy_yoleck::{
 use self::animation_helpers::AnimationHelpersPlugin;
 use self::camera::CameraPlugin;
 use self::doofus::DoofusPlugin;
+use self::door::DoorPlugin;
 pub use self::global_types::MenuActionForKbgp;
 use self::global_types::{AppState, CurrentLevel, MenuState};
 use self::ina::InaPlugin;
@@ -51,6 +53,7 @@ impl Plugin for GamePlugin {
             arena::Block::handler("Block"),
             doofus::Doofus::handler("Doofus"),
             ina::Ina::handler("Ina"),
+            door::Door::handler("door"),
         ]));
         if !self.is_editor {
             app.add_plugin(MenuPlugin);
@@ -62,6 +65,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(InaPlugin);
         app.add_plugin(PlayerControlPlugin);
         app.add_plugin(GameInputPlugin);
+        app.add_plugin(DoorPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
             app.add_system(set_app_state_based_on_editor_state);

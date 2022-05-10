@@ -6,6 +6,7 @@ use bevy::DefaultPlugins;
 use bevy_egui_kbgp::KbgpNavCommand;
 use bevy_egui_kbgp::{KbgpNavBindings, KbgpPlugin, KbgpSettings};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
+use bevy_tweening::TweeningPlugin;
 use clap::Parser;
 use danger_doofus::GamePlugin;
 use danger_doofus::MenuActionForKbgp;
@@ -31,6 +32,7 @@ fn main() {
         ..Default::default()
     });
     app.add_plugins(DefaultPlugins);
+    app.add_plugin(TweeningPlugin);
     app.add_plugin(bevy_yoleck::bevy_egui::EguiPlugin);
     if args.editor {
         app.add_plugin(bevy_yoleck::YoleckPluginForEditor);

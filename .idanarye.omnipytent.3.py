@@ -1,6 +1,8 @@
 from omnipytent import *
 from omnipytent.ext.idan import *
 
+import json
+
 
 @task
 def check(ctx):
@@ -26,9 +28,12 @@ def run(ctx):
 
 @task.options(alias=':0')
 def level(ctx):
-    ctx.key(str)
-    for level in local.path('assets/levels'):
-        yield level.with_suffix('').basename
+    ctx.key(lambda level: level['filename'].removesuffix('.yol').replace('_', ' '))
+    ctx.value(lambda level: level['filename'].removesuffix('.yol'))
+    with local.path('assets/levels/index.yoli').open() as f:
+        level_index = json.load(f)
+    for level in level_index:
+        yield level
 
 
 @task
