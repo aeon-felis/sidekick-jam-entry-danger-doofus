@@ -74,6 +74,7 @@ fn doofus_reach_door(
                 let doofus_transform = doofus_query.get(doofus_entity).unwrap();
                 let door_transform = door_query.get(door_entity).unwrap();
                 cmd.remove::<RigidBody>();
+                cmd.remove::<Collider>();
                 let animation_duration = Duration::from_secs(1);
                 cmd.insert(Animator::new(Tracks::new([
                     Tween::new(

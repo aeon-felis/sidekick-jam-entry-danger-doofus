@@ -74,7 +74,7 @@ def launch_wasm(ctx):
 
 @task
 def browse_wasm(ctx):
-    local['chrome']['http://127.0.0.1:1334']()
+    local['firefox']['http://127.0.0.1:1334']()
 
 
 @task
