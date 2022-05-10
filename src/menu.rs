@@ -2,11 +2,13 @@ use bevy::prelude::*;
 use bevy_egui_kbgp::bevy_egui::EguiContext;
 use bevy_egui_kbgp::egui;
 use bevy_egui_kbgp::prelude::*;
+use bevy_yoleck::YoleckLevelIndex;
 use ezinput::prelude::*;
 
 use crate::global_types::CurrentLevel;
 use crate::global_types::InputBinding;
 use crate::global_types::{AppState, MenuState};
+use crate::utils::some_or;
 
 pub struct MenuPlugin;
 
@@ -92,20 +94,31 @@ fn level_select_menu(
     mut egui_context: ResMut<EguiContext>,
     mut state: ResMut<State<AppState>>,
     mut current_level: ResMut<CurrentLevel>,
+    asset_server: Res<AssetServer>,
+    level_index_assets: Res<Assets<YoleckLevelIndex>>,
+    mut level_index_handle: Local<Option<Handle<YoleckLevelIndex>>>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
         if ui.button("Back To Menu").kbgp_navigation().clicked() {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
         }
-        for (level_caption, level_file) in [("Level 1", "levels/level-01.yol")] {
+        let handle =
+            level_index_handle.get_or_insert_with(|| asset_server.load("levels/index.yoli"));
+        let level_index = some_or!(level_index_assets.get(handle.clone()); return);
+        for level in level_index.iter() {
+            let caption = level
+                .filename
+                .strip_suffix(".yol")
+                .unwrap_or(&level.filename)
+                .replace("_", " ");
             if ui
-                .button(level_caption)
+                .button(caption)
                 .kbgp_navigation()
                 .kbgp_initial_focus()
                 .clicked()
             {
-                current_level.0 = Some(level_file.to_owned());
+                current_level.0 = Some(format!("levels/{}", level.filename));
                 state.set(AppState::LoadLevel).unwrap();
             }
         }
