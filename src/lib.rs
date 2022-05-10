@@ -6,6 +6,7 @@ mod door;
 mod global_types;
 mod ina;
 mod input;
+mod level_progress;
 mod loading;
 mod menu;
 mod player_control;
@@ -27,9 +28,10 @@ use self::camera::CameraPlugin;
 use self::doofus::DoofusPlugin;
 use self::door::DoorPlugin;
 pub use self::global_types::MenuActionForKbgp;
-use self::global_types::{AppState, CurrentLevel, MenuState};
+use self::global_types::{AppState, LevelProgress, MenuState};
 use self::ina::InaPlugin;
 use self::input::GameInputPlugin;
+use self::level_progress::LevelProgressPlugin;
 use self::menu::MenuPlugin;
 use self::player_control::PlayerControlPlugin;
 
@@ -43,10 +45,15 @@ impl Plugin for GamePlugin {
         if self.is_editor {
             app.add_state(AppState::Editor);
         } else if let Some(start_at_level) = &self.start_at_level {
-            app.insert_resource(CurrentLevel(Some(format!("levels/{}.yol", start_at_level))));
-            app.add_state(AppState::LoadLevel);
+            let start_at_level = format!("{}.yol", start_at_level);
+            app.add_startup_system(
+                move |mut level_progress: ResMut<LevelProgress>,
+                      mut state: ResMut<State<AppState>>| {
+                    level_progress.current_level = Some(start_at_level.clone());
+                    state.set(AppState::LoadLevel).unwrap();
+                },
+            );
         } else {
-            app.insert_resource(CurrentLevel(None));
             app.add_state(AppState::Menu(MenuState::Main));
         }
         app.insert_resource(YoleckTypeHandlers::new([
@@ -66,6 +73,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(PlayerControlPlugin);
         app.add_plugin(GameInputPlugin);
         app.add_plugin(DoorPlugin);
+        app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
             app.add_system(set_app_state_based_on_editor_state);
@@ -98,17 +106,18 @@ fn handle_level_loading(
     level_entities_query: Query<Entity, With<YoleckManaged>>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    current_level: Res<CurrentLevel>,
+    level_progress: Res<LevelProgress>,
     mut yoleck_loading_command: ResMut<YoleckLoadingCommand>,
     mut state: ResMut<State<AppState>>,
 ) {
     for entity in level_entities_query.iter() {
         commands.entity(entity).despawn_recursive();
     }
-    let current_level = current_level
-        .0
+    let current_level = level_progress
+        .current_level
         .as_ref()
         .expect("Entered LoadLevel state when current_level is None");
-    *yoleck_loading_command = YoleckLoadingCommand::FromAsset(asset_server.load(current_level));
+    *yoleck_loading_command =
+        YoleckLoadingCommand::FromAsset(asset_server.load(&format!("levels/{}", current_level)));
     state.set(AppState::Game).unwrap();
 }

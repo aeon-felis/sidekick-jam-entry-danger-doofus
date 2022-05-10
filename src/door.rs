@@ -9,7 +9,7 @@ use bevy_tweening::*;
 use bevy_yoleck::YoleckSource;
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, IsDoofus, IsDoor};
+use crate::global_types::{AppState, IsDoofus, IsDoor, TweenCompletedCode};
 use crate::utils::{entities_ordered_by_type, some_or};
 use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
 
@@ -17,7 +17,11 @@ pub struct DoorPlugin;
 
 impl Plugin for DoorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(doofus_reach_door));
+        app.add_system_set({
+            SystemSet::on_update(AppState::Game)
+                .with_system(doofus_reach_door)
+                .with_system(finish_level_when_go_through_door_animation_is_over)
+        });
     }
 }
 
@@ -85,7 +89,8 @@ fn doofus_reach_door(
                             start: Vec3::ONE,
                             end: Vec3::ZERO,
                         },
-                    ),
+                    )
+                    .with_completed_event(true, TweenCompletedCode::ExitDoorFinished as u64),
                     Tween::new(
                         EaseMethod::Linear,
                         TweeningType::Once,
@@ -99,5 +104,21 @@ fn doofus_reach_door(
             }
             CollisionEvent::Stopped(_, _, _) => {}
         }
+    }
+}
+
+fn finish_level_when_go_through_door_animation_is_over(
+    mut state: ResMut<State<AppState>>,
+    mut event_reader: EventReader<TweenCompleted>,
+) {
+    for TweenCompleted {
+        entity: _,
+        user_data,
+    } in event_reader.iter()
+    {
+        if *user_data != TweenCompletedCode::ExitDoorFinished as u64 {
+            continue;
+        }
+        state.set(AppState::LevelCompleted).unwrap();
     }
 }

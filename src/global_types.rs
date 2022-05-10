@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_yoleck::YoleckLevelIndex;
 use ezinput::prelude::BindingTypeView;
 use ezinput_macros::BindingTypeView;
 use serde::{Deserialize, Serialize};
@@ -12,6 +13,7 @@ pub enum AppState {
     // ClearLevelAndThenLoad,
     LoadLevel,
     Game,
+    LevelCompleted,
     Editor,
 }
 
@@ -20,11 +22,20 @@ pub enum MenuState {
     Main,
     LevelSelect,
     Pause,
+    LevelCompleted,
     GameOver,
 }
 
-#[derive(Component)]
-pub struct CurrentLevel(pub Option<String>);
+pub struct LevelProgress {
+    pub just_completed: Option<String>,
+    pub current_level: Option<String>,
+    pub level_index_handle: Handle<YoleckLevelIndex>,
+}
+
+#[derive(Debug)]
+pub enum TweenCompletedCode {
+    ExitDoorFinished,
+}
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum InputBinding {
