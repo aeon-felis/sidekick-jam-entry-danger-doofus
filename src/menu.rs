@@ -111,7 +111,7 @@ fn level_select_menu(
                 .filename
                 .strip_suffix(".yol")
                 .unwrap_or(&level.filename)
-                .replace("_", " ");
+                .replace('_', " ");
             if ui
                 .button(caption)
                 .kbgp_navigation()
