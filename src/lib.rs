@@ -3,6 +3,7 @@ mod arena;
 mod camera;
 mod doofus;
 mod door;
+mod gate;
 mod global_types;
 mod ina;
 mod input;
@@ -44,15 +45,6 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         if self.is_editor {
             app.add_state(AppState::Editor);
-        } else if let Some(start_at_level) = &self.start_at_level {
-            let start_at_level = format!("{}.yol", start_at_level);
-            app.add_startup_system(
-                move |mut level_progress: ResMut<LevelProgress>,
-                      mut state: ResMut<State<AppState>>| {
-                    level_progress.current_level = Some(start_at_level.clone());
-                    state.set(AppState::LoadLevel).unwrap();
-                },
-            );
         } else {
             app.add_state(AppState::Menu(MenuState::Main));
         }
@@ -60,7 +52,8 @@ impl Plugin for GamePlugin {
             arena::Block::handler("Block"),
             doofus::Doofus::handler("Doofus"),
             ina::Ina::handler("Ina"),
-            door::Door::handler("door"),
+            door::Door::handler("Door"),
+            gate::Gate::handler("Gate"),
         ]));
         if !self.is_editor {
             app.add_plugin(MenuPlugin);
@@ -81,6 +74,16 @@ impl Plugin for GamePlugin {
             app.add_system_set(
                 SystemSet::on_enter(AppState::LoadLevel).with_system(handle_level_loading),
             );
+            if let Some(start_at_level) = &self.start_at_level {
+                let start_at_level = format!("{}.yol", start_at_level);
+                app.add_startup_system(
+                    move |mut level_progress: ResMut<LevelProgress>,
+                          mut state: ResMut<State<AppState>>| {
+                        level_progress.current_level = Some(start_at_level.clone());
+                        state.set(AppState::LoadLevel).unwrap();
+                    },
+                );
+            }
         }
     }
 }

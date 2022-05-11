@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::egui;
 
-use crate::global_types::Facing;
+use crate::global_types::{ColorCode, Facing};
 
 pub const GRANULARITY: f32 = 1.0;
 
@@ -54,4 +54,14 @@ pub fn facing_edit(ui: &mut egui::Ui, facing: &mut Facing) {
         ui.selectable_value(facing, Facing::Left, "<-");
         ui.selectable_value(facing, Facing::Right, "->");
     });
+}
+
+pub fn color_code_edit(ui: &mut egui::Ui, color_code: &mut ColorCode) {
+    egui::ComboBox::from_label("")
+        .selected_text(color_code.egui_rich_text())
+        .show_ui(ui, |ui| {
+            for item in ColorCode::items() {
+                ui.selectable_value(color_code, item, item.egui_rich_text());
+            }
+        });
 }

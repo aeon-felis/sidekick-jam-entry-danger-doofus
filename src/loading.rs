@@ -20,6 +20,8 @@ pub struct GraphicAssets {
     pub ina: Handle<Image>,
     #[asset(path = "sprites/door.png")]
     pub door: Handle<Image>,
+    #[asset(path = "sprites/gate.png")]
+    pub gate: Handle<Image>,
 }
 
 #[derive(AssetCollection)]
