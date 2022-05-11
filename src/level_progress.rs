@@ -66,12 +66,12 @@ fn handle_level_completion(
     mut level_progress: ResMut<LevelProgress>,
     mut state: ResMut<State<AppState>>,
 ) {
+    let completed_level = some_or!(
+        level_progress.current_level.as_ref();
+        return // level completed inside editor
+    );
     let level_index = some_or!(level_index_assets.get(&level_progress.level_index_handle); return);
     let mut it = level_index.iter();
-    let completed_level = level_progress
-        .current_level
-        .as_ref()
-        .expect("we just completed it, it cannot be empty");
     if let Err(err) = pkv.set(LEVEL_PKV_KEY, completed_level) {
         error!("Cannot save level progression: {}", err);
     }

@@ -77,7 +77,9 @@ fn update_crystals_activation(
                 *crystal_texture = asset_server.load("sprites/crystal-on.png");
             }
         } else {
-            crystal_state.num_activators -= 1;
+            if 0 < crystal_state.num_activators {
+                crystal_state.num_activators -= 1;
+            }
             if crystal_state.num_activators == 0 {
                 *crystal_texture = asset_server.load("sprites/crystal-off.png");
             }
