@@ -79,6 +79,9 @@ pub struct IsDoofus;
 pub struct IsIna;
 
 #[derive(Component)]
+pub struct IsCrystalActivator;
+
+#[derive(Component)]
 pub struct IsPlatform;
 
 #[derive(Component)]
@@ -89,7 +92,7 @@ pub struct IsGate;
 
 #[derive(Component)]
 pub struct CrystalState {
-    pub activated: bool,
+    pub num_activators: usize,
 }
 
 #[derive(Debug, Clone, Copy, Component, Serialize, Deserialize, PartialEq, Eq)]

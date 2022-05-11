@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::*;
 use bevy_yoleck::YoleckSource;
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, Facing, IsDoofus, IsPlatform};
+use crate::global_types::{AppState, Facing, IsCrystalActivator, IsDoofus, IsPlatform};
 use crate::utils::{entities_ordered_by_type, some_or};
 use crate::yoleck_utils::{facing_edit, position_edit, position_to_transform, GRANULARITY};
 
@@ -28,6 +28,7 @@ pub struct Doofus {
 impl YoleckSource for Doofus {
     fn populate(&self, ctx: &bevy_yoleck::YoleckPopulateContext, cmd: &mut EntityCommands) {
         cmd.insert(IsDoofus);
+        cmd.insert(IsCrystalActivator);
         cmd.insert(self.facing);
         cmd.insert_bundle(SpriteBundle {
             transform: position_to_transform(self.position, 1, 1),

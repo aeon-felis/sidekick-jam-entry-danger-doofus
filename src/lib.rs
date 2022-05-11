@@ -1,6 +1,7 @@
 mod animation_helpers;
 mod arena;
 mod camera;
+mod crystal;
 mod doofus;
 mod door;
 mod gate;
@@ -13,7 +14,6 @@ mod menu;
 mod player_control;
 mod utils;
 mod yoleck_utils;
-mod crystal;
 
 use crate::loading::LoadingPlugin;
 
@@ -27,6 +27,7 @@ use bevy_yoleck::{
 
 use self::animation_helpers::AnimationHelpersPlugin;
 use self::camera::CameraPlugin;
+use self::crystal::CrystalPlugin;
 use self::doofus::DoofusPlugin;
 use self::door::DoorPlugin;
 pub use self::global_types::MenuActionForKbgp;
@@ -68,6 +69,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(PlayerControlPlugin);
         app.add_plugin(GameInputPlugin);
         app.add_plugin(DoorPlugin);
+        app.add_plugin(CrystalPlugin);
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
