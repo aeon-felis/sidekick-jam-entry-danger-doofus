@@ -4,6 +4,7 @@ mod camera;
 mod crystal;
 mod doofus;
 mod door;
+mod floating_text;
 mod gate;
 mod global_types;
 mod ina;
@@ -58,6 +59,7 @@ impl Plugin for GamePlugin {
             door::Door::handler("Door"),
             gate::Gate::handler("Gate"),
             crystal::Crystal::handler("Crystal"),
+            floating_text::FloatingText::handler("FloatingText"),
         ]));
         if !self.is_editor {
             app.add_plugin(MenuPlugin);
