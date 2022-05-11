@@ -30,6 +30,7 @@ impl YoleckSource for Crystal {
         cmd: &mut bevy::ecs::system::EntityCommands,
     ) {
         cmd.insert(CrystalState { num_activators: 0 });
+        cmd.insert(self.color_code);
         cmd.insert(IsPlatform);
         cmd.insert_bundle(SpriteBundle {
             transform: position_to_transform(self.position, 1, 1),

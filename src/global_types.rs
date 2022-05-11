@@ -88,7 +88,10 @@ pub struct IsPlatform;
 pub struct IsDoor;
 
 #[derive(Component)]
-pub struct IsGate;
+pub struct GateState {
+    pub y_when_closed: f32,
+    pub is_open: bool,
+}
 
 #[derive(Component)]
 pub struct CrystalState {

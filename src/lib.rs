@@ -30,6 +30,7 @@ use self::camera::CameraPlugin;
 use self::crystal::CrystalPlugin;
 use self::doofus::DoofusPlugin;
 use self::door::DoorPlugin;
+use self::gate::GatePlugin;
 pub use self::global_types::MenuActionForKbgp;
 use self::global_types::{AppState, LevelProgress, MenuState};
 use self::ina::InaPlugin;
@@ -70,6 +71,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(GameInputPlugin);
         app.add_plugin(DoorPlugin);
         app.add_plugin(CrystalPlugin);
+        app.add_plugin(GatePlugin);
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
