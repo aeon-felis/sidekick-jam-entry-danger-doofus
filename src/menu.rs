@@ -120,18 +120,22 @@ fn level_select_menu(
         if ui.kbgp_user_action() == Some(MenuActionForKbgp) {
             ui.kbgp_set_focus_label(FocusLabel::BackToMainMenu);
         }
-        if ui
+        let mut response = ui
             .button("Back To Menu")
             .kbgp_navigation()
-            .kbgp_focus_label(FocusLabel::Exit)
-            .clicked()
+            .kbgp_focus_label(FocusLabel::BackToMainMenu);
+        let level_index = level_index_assets.get(&level_progress.level_index_handle);
+        if level_index
+            .map(|level_index| level_index.len() < level_progress.num_levels_available)
+            .unwrap_or(true)
         {
+            response = response.kbgp_focus_label(FocusLabel::NextLevel);
+        }
+        if response.clicked() {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
         }
-        let level_index = some_or!(
-            level_index_assets.get(&level_progress.level_index_handle);
-            return);
+        let level_index = some_or!(level_index; return);
         for (index, level) in level_index.iter().enumerate() {
             let mut response = ui
                 .add_enabled(
@@ -238,11 +242,16 @@ fn level_completed_menu(
         {
             state.set(AppState::Menu(MenuState::LevelSelect)).unwrap();
             ui.kbgp_clear_input();
-            ui.kbgp_set_focus_label(FocusLabel::CurrentLevel);
+            if level_progress.current_level.is_some() {
+                ui.kbgp_set_focus_label(FocusLabel::CurrentLevel);
+            } else {
+                ui.kbgp_set_focus_label(FocusLabel::BackToMainMenu);
+            }
         }
         if ui.button("Main Menu").kbgp_navigation().clicked() {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
+            ui.kbgp_set_focus_label(FocusLabel::Start);
         }
         #[cfg(not(target_arch = "wasm32"))]
         if ui
