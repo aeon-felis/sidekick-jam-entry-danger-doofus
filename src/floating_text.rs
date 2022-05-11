@@ -40,7 +40,7 @@ impl YoleckSource for FloatingText {
                     self.text.clone(),
                     TextStyle {
                         font: ctx.asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: 24.0,
+                        font_size: 72.0,
                         color: Color::WHITE,
                     },
                     TextAlignment {
@@ -74,6 +74,6 @@ impl YoleckSource for FloatingText {
             );
         });
         ui.text_edit_multiline(&mut self.text);
-        ui.add(egui::Slider::new(&mut self.scale, 0.01..=1.0).logarithmic(true));
+        ui.add(egui::Slider::new(&mut self.scale, 0.005..=0.05).logarithmic(true));
     }
 }
