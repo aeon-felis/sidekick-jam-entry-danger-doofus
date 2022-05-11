@@ -85,6 +85,9 @@ pub struct IsCrystalActivator;
 pub struct IsPlatform;
 
 #[derive(Component)]
+pub struct IsSpringBoard;
+
+#[derive(Component)]
 pub struct IsDoor;
 
 #[derive(Component)]

@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::*;
 use bevy_yoleck::YoleckSource;
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{IsCrystalActivator, IsIna};
+use crate::global_types::{IsCrystalActivator, IsIna, IsSpringBoard};
 use crate::player_control::PlayerControl;
 use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
 
@@ -25,6 +25,7 @@ impl YoleckSource for Ina {
     fn populate(&self, ctx: &bevy_yoleck::YoleckPopulateContext, cmd: &mut EntityCommands) {
         cmd.insert(IsIna);
         cmd.insert(IsCrystalActivator);
+        cmd.insert(IsSpringBoard);
         cmd.insert_bundle(SpriteBundle {
             transform: position_to_transform(self.position, 1, 1),
             sprite: Sprite {

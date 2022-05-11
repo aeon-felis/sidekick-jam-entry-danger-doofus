@@ -5,7 +5,9 @@ use bevy_rapier2d::prelude::*;
 use bevy_yoleck::YoleckSource;
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, Facing, IsCrystalActivator, IsDoofus, IsPlatform};
+use crate::global_types::{
+    AppState, Facing, IsCrystalActivator, IsDoofus, IsPlatform, IsSpringBoard,
+};
 use crate::utils::{entities_ordered_by_type, some_or};
 use crate::yoleck_utils::{facing_edit, position_edit, position_to_transform, GRANULARITY};
 
@@ -57,6 +59,7 @@ impl YoleckSource for Doofus {
 fn propel_doofus(
     mut doofus_query: Query<(&mut Velocity, &mut Facing), With<IsDoofus>>,
     platform_query: Query<(), With<IsPlatform>>,
+    springboard_query: Query<(), With<IsSpringBoard>>,
     mut collision_events: EventReader<CollisionEvent>,
     rapier_context: Res<RapierContext>,
 ) {
@@ -77,10 +80,15 @@ fn propel_doofus(
                     };
                     let doty = normal.dot(Vec2::Y);
                     if let Ok((mut velocity, mut facing)) = doofus_query.get_mut(doofus_entity) {
-                        if platform_query.contains(other_entity) {
-                            if 0.5 < doty {
+                        if 0.5 < doty {
+                            if springboard_query.contains(other_entity) {
+                                velocity.linvel = Vec2::new(facing.signum() * 2.0, 9.0);
+                            } else if platform_query.contains(other_entity) {
                                 velocity.linvel = Vec2::new(facing.signum() * 2.0, 3.0);
-                            } else if doty.abs() <= 0.5 && normal.x.signum() != facing.signum() {
+                            }
+                        } else if doty.abs() <= 0.5 && normal.x.signum() != facing.signum() {
+                            #[allow(clippy::collapsible_if)]
+                            if platform_query.contains(other_entity) {
                                 *facing = facing.reverse();
                                 velocity.linvel.x = -velocity.linvel.x;
                             }
