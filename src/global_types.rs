@@ -87,6 +87,11 @@ pub struct IsDoor;
 #[derive(Component)]
 pub struct IsGate;
 
+#[derive(Component)]
+pub struct CrystalState {
+    pub activated: bool,
+}
+
 #[derive(Debug, Clone, Copy, Component, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ColorCode {
     Red,

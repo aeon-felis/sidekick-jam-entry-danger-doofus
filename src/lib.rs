@@ -13,6 +13,7 @@ mod menu;
 mod player_control;
 mod utils;
 mod yoleck_utils;
+mod crystal;
 
 use crate::loading::LoadingPlugin;
 
@@ -54,6 +55,7 @@ impl Plugin for GamePlugin {
             ina::Ina::handler("Ina"),
             door::Door::handler("Door"),
             gate::Gate::handler("Gate"),
+            crystal::Crystal::handler("Crystal"),
         ]));
         if !self.is_editor {
             app.add_plugin(MenuPlugin);

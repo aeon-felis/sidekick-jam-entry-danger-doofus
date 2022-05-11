@@ -21,6 +21,9 @@ fn hold_assets(
         asset_server.load_untyped("sprites/ina.png"),
         asset_server.load_untyped("sprites/door.png"),
         asset_server.load_untyped("sprites/gate.png"),
+        asset_server.load_untyped("sprites/crystal-off.png"),
+        asset_server.load_untyped("sprites/crystal-on.png"),
+
         asset_server.load_untyped("fonts/FiraSans-Bold.ttf"),
     ]);
 }
