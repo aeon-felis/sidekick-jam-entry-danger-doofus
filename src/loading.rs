@@ -1,31 +1,26 @@
 use bevy::prelude::*;
-use bevy_asset_loader::{AssetCollection, AssetCollectionApp};
 
 pub struct LoadingPlugin;
 
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.init_collection::<GraphicAssets>();
-        app.init_collection::<FontAssets>();
+        app.insert_resource(HeldAssets(Default::default()));
+        app.add_startup_system(hold_assets);
     }
 }
 
-#[derive(AssetCollection)]
-pub struct GraphicAssets {
-    #[asset(path = "sprites/block-tile.png")]
-    pub block_tile: Handle<Image>,
-    #[asset(path = "sprites/doofus.png")]
-    pub doofus: Handle<Image>,
-    #[asset(path = "sprites/ina.png")]
-    pub ina: Handle<Image>,
-    #[asset(path = "sprites/door.png")]
-    pub door: Handle<Image>,
-    #[asset(path = "sprites/gate.png")]
-    pub gate: Handle<Image>,
-}
+struct HeldAssets(Vec<HandleUntyped>);
 
-#[derive(AssetCollection)]
-pub struct FontAssets {
-    #[asset(path = "fonts/FiraSans-Bold.ttf")]
-    pub fira_sans: Handle<Font>,
+fn hold_assets(
+    asset_server: Res<AssetServer>,
+    mut held_assets: ResMut<HeldAssets>,
+) {
+    held_assets.0.extend([
+        asset_server.load_untyped("sprites/block-tile.png"),
+        asset_server.load_untyped("sprites/doofus.png"),
+        asset_server.load_untyped("sprites/ina.png"),
+        asset_server.load_untyped("sprites/door.png"),
+        asset_server.load_untyped("sprites/gate.png"),
+        asset_server.load_untyped("fonts/FiraSans-Bold.ttf"),
+    ]);
 }
