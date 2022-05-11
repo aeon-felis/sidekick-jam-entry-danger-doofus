@@ -65,7 +65,9 @@ impl Plugin for GamePlugin {
             app.add_plugin(MenuPlugin);
         }
         app.add_plugin(LoadingPlugin);
-        app.add_plugin(CameraPlugin);
+        app.add_plugin(CameraPlugin {
+            is_editor: self.is_editor,
+        });
         app.add_plugin(AnimationHelpersPlugin);
         app.add_plugin(DoofusPlugin);
         app.add_plugin(InaPlugin);
