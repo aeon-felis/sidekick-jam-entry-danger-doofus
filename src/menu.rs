@@ -135,25 +135,27 @@ fn level_select_menu(
             state.set(AppState::Menu(MenuState::Main)).unwrap();
             ui.kbgp_clear_input();
         }
-        let level_index = some_or!(level_index; return);
-        for (index, level) in level_index.iter().enumerate() {
-            let mut response = ui
-                .add_enabled(
-                    index < level_progress.num_levels_available,
-                    egui::Button::new(format_level_name(&level.filename)),
-                )
-                .kbgp_navigation();
-            if index + 1 == level_progress.num_levels_available {
-                response = response.kbgp_focus_label(FocusLabel::NextLevel);
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            let level_index = some_or!(level_index; return);
+            for (index, level) in level_index.iter().enumerate() {
+                let mut response = ui
+                    .add_enabled(
+                        index < level_progress.num_levels_available,
+                        egui::Button::new(format_level_name(&level.filename)),
+                    )
+                    .kbgp_navigation();
+                if index + 1 == level_progress.num_levels_available {
+                    response = response.kbgp_focus_label(FocusLabel::NextLevel);
+                }
+                if Some(&level.filename) == level_progress.current_level.as_ref() {
+                    response = response.kbgp_focus_label(FocusLabel::CurrentLevel);
+                }
+                if response.clicked() {
+                    level_progress.current_level = Some(level.filename.clone());
+                    state.set(AppState::LoadLevel).unwrap();
+                }
             }
-            if Some(&level.filename) == level_progress.current_level.as_ref() {
-                response = response.kbgp_focus_label(FocusLabel::CurrentLevel);
-            }
-            if response.clicked() {
-                level_progress.current_level = Some(level.filename.clone());
-                state.set(AppState::LoadLevel).unwrap();
-            }
-        }
+        });
     });
 }
 
