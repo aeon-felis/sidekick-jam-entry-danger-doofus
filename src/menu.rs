@@ -215,10 +215,13 @@ fn level_completed_menu(
             ui.kbgp_set_focus_label(FocusLabel::Exit);
         }
         let just_completed = level_progress.just_completed.as_ref().unwrap();
-        ui.colored_label(
-            egui::Color32::WHITE,
-            format!("Finished {}", format_level_name(just_completed)),
+        ui.label(
+            egui::RichText::new(format!("Finished {:?}", format_level_name(just_completed)))
+            .color(egui::Color32::WHITE)
+            .background_color(egui::Color32::BLACK)
+            .text_style(egui::TextStyle::Heading),
         );
+        ui.add_space(8.0);
         if let Some(current_level) = &level_progress.current_level {
             if ui
                 .button(format!("Next Level: {}", format_level_name(current_level)))
@@ -233,8 +236,10 @@ fn level_completed_menu(
                 egui::RichText::new("Congratulations!\nYou have finished the game!")
                     .strong()
                     .color(egui::Color32::WHITE)
+                    .background_color(egui::Color32::BLACK)
                     .text_style(egui::TextStyle::Heading),
             );
+            ui.add_space(8.0);
         }
         if ui
             .button("Level Select")
