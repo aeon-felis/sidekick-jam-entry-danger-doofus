@@ -20,6 +20,7 @@ impl Plugin for CameraPlugin {
 
 fn setup_camera(mut commands: Commands) {
     let mut camera = OrthographicCameraBundle::new_2d();
+    camera.transform.translation.z = 100.0;
     camera.transform.scale = Vec3::new(0.016, 0.016, 1.0);
     commands.spawn_bundle(camera);
 }

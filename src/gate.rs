@@ -29,7 +29,7 @@ impl YoleckSource for Gate {
         ctx: &bevy_yoleck::YoleckPopulateContext,
         cmd: &mut bevy::ecs::system::EntityCommands,
     ) {
-        let transform = position_to_transform(self.position, 1, 1);
+        let transform = position_to_transform(self.position.extend(-1.0), 1, 1);
         cmd.insert(GateState {
             y_when_closed: transform.translation.y,
             is_open: false,

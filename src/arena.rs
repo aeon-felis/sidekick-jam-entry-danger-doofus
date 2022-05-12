@@ -38,7 +38,7 @@ impl YoleckSource for Block {
             self.height as f32 * GRANULARITY,
         );
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(self.position, self.width, self.height),
+            transform: position_to_transform(self.position.extend(0.0), self.width, self.height),
             sprite: Sprite {
                 color: Color::NONE,
                 custom_size: Some(size),

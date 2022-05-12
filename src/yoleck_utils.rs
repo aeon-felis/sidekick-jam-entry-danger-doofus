@@ -40,11 +40,11 @@ pub fn position_edit(
     *position = round_vec2_to_tick(*position, GRANULARITY);
 }
 
-pub fn position_to_transform(position: Vec2, width: usize, height: usize) -> Transform {
+pub fn position_to_transform(position: Vec3, width: usize, height: usize) -> Transform {
     Transform::from_xyz(
         position.x + 0.5 * GRANULARITY * width as f32,
         position.y + 0.5 * GRANULARITY * height as f32,
-        0.0,
+        position.z,
     )
 }
 

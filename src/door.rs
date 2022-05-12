@@ -39,7 +39,7 @@ impl YoleckSource for Door {
     ) {
         cmd.insert(IsDoor);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(self.position, 1, 1),
+            transform: position_to_transform(self.position.extend(-1.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 ..Default::default()
