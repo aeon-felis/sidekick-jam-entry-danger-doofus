@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use ezinput::prelude::*;
 
-use crate::global_types::InputBinding;
+use crate::global_types::{AppState, InputBinding};
 
 pub struct GameInputPlugin;
 
@@ -11,6 +11,10 @@ impl Plugin for GameInputPlugin {
         app.init_resource::<InputConfig>();
         app.add_startup_system(setup_keyboard_input);
         app.add_system(handle_gamepad_events);
+        app.add_system_set(
+            SystemSet::on_enter(AppState::Game)
+                .with_system(reset_input_from_menu_when_starting_game),
+        );
     }
 }
 
@@ -63,6 +67,14 @@ fn setup_keyboard_input(mut commands: Commands, input_config: Res<InputConfig>) 
         .spawn()
         .insert(input_config.0.clone())
         .insert(EZInputKeyboardService);
+}
+
+fn reset_input_from_menu_when_starting_game(mut input: Query<&mut InputView<InputBinding>>) {
+    for mut inp in input.iter_mut() {
+        for key_state in inp.key_receiver_states.values_mut() {
+            *key_state = ezinput::prelude::PressState::Released;
+        }
+    }
 }
 
 fn handle_gamepad_events(
