@@ -72,8 +72,25 @@ fn handle_level_completion(
     );
     let level_index = some_or!(level_index_assets.get(&level_progress.level_index_handle); return);
     let mut it = level_index.iter();
-    if let Err(err) = pkv.set(LEVEL_PKV_KEY, completed_level) {
-        error!("Cannot save level progression: {}", err);
+
+    let is_new_level_better = if let Ok(best_completed) = pkv.get::<String>(LEVEL_PKV_KEY) {
+        level_index.iter().rev().find_map(|level| {
+            if level.filename == best_completed {
+                Some(false)
+            } else if level.filename == *completed_level {
+                Some(true)
+            } else {
+                None
+            }
+        }).unwrap_or(true)
+    } else {
+        true
+    };
+
+    if is_new_level_better {
+        if let Err(err) = pkv.set(LEVEL_PKV_KEY, completed_level) {
+            error!("Cannot save level progression: {}", err);
+        }
     }
     let _current_level = it
         .by_ref()
