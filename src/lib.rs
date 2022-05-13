@@ -19,7 +19,6 @@ mod yoleck_utils;
 use crate::loading::LoadingPlugin;
 
 use bevy::app::App;
-#[cfg(debug_assertions)]
 use bevy::prelude::*;
 use bevy_rapier2d::plugin::RapierConfiguration;
 use bevy_yoleck::{
