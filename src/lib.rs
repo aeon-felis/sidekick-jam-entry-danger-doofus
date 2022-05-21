@@ -21,15 +21,15 @@ use crate::loading::LoadingPlugin;
 use bevy::app::App;
 use bevy::prelude::*;
 use bevy_rapier2d::plugin::RapierConfiguration;
-use bevy_yoleck::{
-    YoleckEditorState, YoleckLoadingCommand, YoleckManaged, YoleckSource, YoleckTypeHandlers,
-};
+use bevy_yoleck::{YoleckEditorState, YoleckLoadingCommand, YoleckManaged};
 
 use self::animation_helpers::AnimationHelpersPlugin;
+use self::arena::ArenaPlugin;
 use self::camera::CameraPlugin;
 use self::crystal::CrystalPlugin;
 use self::doofus::DoofusPlugin;
 use self::door::DoorPlugin;
+use self::floating_text::FloatingTextPlugin;
 use self::gate::GatePlugin;
 pub use self::global_types::MenuActionForKbgp;
 use self::global_types::{AppState, LevelProgress, MenuState};
@@ -51,15 +51,6 @@ impl Plugin for GamePlugin {
         } else {
             app.add_state(AppState::Menu(MenuState::Main));
         }
-        app.insert_resource(YoleckTypeHandlers::new([
-            arena::Block::handler("Block"),
-            doofus::Doofus::handler("Doofus"),
-            ina::Ina::handler("Ina"),
-            door::Door::handler("Door"),
-            gate::Gate::handler("Gate"),
-            crystal::Crystal::handler("Crystal"),
-            floating_text::FloatingText::handler("FloatingText"),
-        ]));
         if !self.is_editor {
             app.add_plugin(MenuPlugin);
         }
@@ -68,13 +59,17 @@ impl Plugin for GamePlugin {
             is_editor: self.is_editor,
         });
         app.add_plugin(AnimationHelpersPlugin);
+
+        app.add_plugin(ArenaPlugin);
         app.add_plugin(DoofusPlugin);
         app.add_plugin(InaPlugin);
+        app.add_plugin(DoorPlugin);
+        app.add_plugin(GatePlugin);
+        app.add_plugin(CrystalPlugin);
+        app.add_plugin(FloatingTextPlugin);
+
         app.add_plugin(PlayerControlPlugin);
         app.add_plugin(GameInputPlugin);
-        app.add_plugin(DoorPlugin);
-        app.add_plugin(CrystalPlugin);
-        app.add_plugin(GatePlugin);
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {

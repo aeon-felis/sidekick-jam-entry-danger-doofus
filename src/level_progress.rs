@@ -74,15 +74,19 @@ fn handle_level_completion(
     let mut it = level_index.iter();
 
     let is_new_level_better = if let Ok(best_completed) = pkv.get::<String>(LEVEL_PKV_KEY) {
-        level_index.iter().rev().find_map(|level| {
-            if level.filename == best_completed {
-                Some(false)
-            } else if level.filename == *completed_level {
-                Some(true)
-            } else {
-                None
-            }
-        }).unwrap_or(true)
+        level_index
+            .iter()
+            .rev()
+            .find_map(|level| {
+                if level.filename == best_completed {
+                    Some(false)
+                } else if level.filename == *completed_level {
+                    Some(true)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or(true)
     } else {
         true
     };

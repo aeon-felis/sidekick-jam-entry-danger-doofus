@@ -1,12 +1,11 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_egui::egui;
 use bevy_rapier2d::prelude::*;
 use bevy_rapier2d::rapier::prelude::CollisionEventFlags;
 use bevy_tweening::lens::{TransformPositionLens, TransformScaleLens};
 use bevy_tweening::*;
-use bevy_yoleck::YoleckSource;
+use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, IsDoofus, IsDoor, TweenCompletedCode};
@@ -17,6 +16,11 @@ pub struct DoorPlugin;
 
 impl Plugin for DoorPlugin {
     fn build(&self, app: &mut App) {
+        app.add_yoleck_handler({
+            YoleckTypeHandlerFor::<Door>::new("Door")
+                .populate_with(populate)
+                .edit_with(edit)
+        });
         app.add_system_set({
             SystemSet::on_update(AppState::Game)
                 .with_system(doofus_reach_door)
@@ -25,36 +29,34 @@ impl Plugin for DoorPlugin {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Door {
     #[serde(default)]
     position: Vec2,
 }
 
-impl YoleckSource for Door {
-    fn populate(
-        &self,
-        ctx: &bevy_yoleck::YoleckPopulateContext,
-        cmd: &mut bevy::ecs::system::EntityCommands,
-    ) {
+fn populate(mut populate: YoleckPopulate<Door>, asset_server: Res<AssetServer>) {
+    populate.populate(|_ctx, data, mut cmd| {
         cmd.insert(IsDoor);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(self.position.extend(-1.0), 1, 1),
+            transform: position_to_transform(data.position.extend(-1.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 ..Default::default()
             },
-            texture: ctx.asset_server.load("sprites/door.png"),
+            texture: asset_server.load("sprites/door.png"),
             ..Default::default()
         });
         cmd.insert(RigidBody::Fixed);
         cmd.insert(Collider::cuboid(0.25 * GRANULARITY, 0.5 * GRANULARITY));
         cmd.insert(Sensor(true));
-    }
+    });
+}
 
-    fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut egui::Ui) {
-        position_edit(ctx, ui, &mut self.position, 1, 1);
-    }
+fn edit(mut edit: YoleckEdit<Door>) {
+    edit.edit(|ctx, data, ui| {
+        position_edit(ctx, ui, &mut data.position, 1, 1);
+    });
 }
 
 fn doofus_reach_door(

@@ -1,21 +1,26 @@
-use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy_egui::egui;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::YoleckSource;
+use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsPlatform;
 use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
 
-struct ArenaPlugin;
+pub struct ArenaPlugin;
 
 impl Plugin for ArenaPlugin {
-    fn build(&self, _app: &mut App) {}
+    fn build(&self, app: &mut App) {
+        app.add_yoleck_handler({
+            YoleckTypeHandlerFor::<Block>::new("Block")
+                .populate_with(populate)
+                .edit_with(edit)
+        });
+    }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Block {
     #[serde(default)]
     position: Vec2,
@@ -31,14 +36,14 @@ fn the_fucking_number_one_why_cant_serde_accept_literals() -> usize {
     1
 }
 
-impl YoleckSource for Block {
-    fn populate(&self, ctx: &bevy_yoleck::YoleckPopulateContext, cmd: &mut EntityCommands) {
+fn populate(mut populate: YoleckPopulate<Block>, asset_server: Res<AssetServer>) {
+    populate.populate(|ctx, data, mut cmd| {
         let size = Vec2::new(
-            self.width as f32 * GRANULARITY,
-            self.height as f32 * GRANULARITY,
+            data.width as f32 * GRANULARITY,
+            data.height as f32 * GRANULARITY,
         );
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(self.position.extend(0.0), self.width, self.height),
+            transform: position_to_transform(data.position.extend(0.0), data.width, data.height),
             sprite: Sprite {
                 color: Color::NONE,
                 custom_size: Some(size),
@@ -50,11 +55,11 @@ impl YoleckSource for Block {
         cmd.insert(Collider::cuboid(0.5 * size.x, 0.5 * size.y));
         cmd.insert(IsPlatform);
 
-        if ctx.is_first_time() || self.prev_dimenstions != [self.width, self.height] {
+        if ctx.is_first_time() || data.prev_dimenstions != [data.width, data.height] {
             cmd.despawn_descendants();
             cmd.with_children(|commands| {
                 let first_tile_center = 0.5 * (-size + Vec2::ONE * GRANULARITY);
-                for (w, h) in (0..self.width).cartesian_product(0..self.height) {
+                for (w, h) in (0..data.width).cartesian_product(0..data.height) {
                     commands.spawn_bundle(SpriteBundle {
                         transform: {
                             Transform::from_xyz(
@@ -67,21 +72,23 @@ impl YoleckSource for Block {
                             custom_size: Some(Vec2::ONE * GRANULARITY),
                             ..Default::default()
                         },
-                        texture: ctx.asset_server.load("sprites/block-tile.png"),
+                        texture: asset_server.load("sprites/block-tile.png"),
                         ..Default::default()
                     });
                 }
             });
         }
-    }
+    });
+}
 
-    fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut egui::Ui) {
-        position_edit(ctx, ui, &mut self.position, self.width, self.height);
-        self.prev_dimenstions = [self.width, self.height];
+fn edit(mut edit: YoleckEdit<Block>) {
+    edit.edit(|ctx, data, ui| {
+        position_edit(ctx, ui, &mut data.position, data.width, data.height);
+        data.prev_dimenstions = [data.width, data.height];
         ui.horizontal(|ui| {
-            for (caption, value) in [("Width:", &mut self.width), ("Height:", &mut self.height)] {
+            for (caption, value) in [("Width:", &mut data.width), ("Height:", &mut data.height)] {
                 ui.add(egui::DragValue::new(value).prefix(caption).speed(0.05));
             }
         });
-    }
+    });
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::YoleckSource;
+use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{ColorCode, CrystalState, IsCrystalActivator, IsPlatform};
@@ -11,11 +11,16 @@ pub struct CrystalPlugin;
 
 impl Plugin for CrystalPlugin {
     fn build(&self, app: &mut App) {
+        app.add_yoleck_handler({
+            YoleckTypeHandlerFor::<Crystal>::new("Crystal")
+                .populate_with(populate)
+                .edit_with(edit)
+        });
         app.add_system(update_crystals_activation);
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Crystal {
     #[serde(default)]
     position: Vec2,
@@ -23,34 +28,32 @@ pub struct Crystal {
     color_code: ColorCode,
 }
 
-impl YoleckSource for Crystal {
-    fn populate(
-        &self,
-        ctx: &bevy_yoleck::YoleckPopulateContext,
-        cmd: &mut bevy::ecs::system::EntityCommands,
-    ) {
+fn populate(mut populate: YoleckPopulate<Crystal>, asset_server: Res<AssetServer>) {
+    populate.populate(|_ctx, data, mut cmd| {
         cmd.insert(CrystalState { num_activators: 0 });
-        cmd.insert(self.color_code);
+        cmd.insert(data.color_code);
         cmd.insert(IsPlatform);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(self.position.extend(-1.0), 1, 1),
+            transform: position_to_transform(data.position.extend(-1.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
-                color: self.color_code.bevy_color(),
+                color: data.color_code.bevy_color(),
                 ..Default::default()
             },
-            texture: ctx.asset_server.load("sprites/crystal-off.png"),
+            texture: asset_server.load("sprites/crystal-off.png"),
             ..Default::default()
         });
         cmd.insert(RigidBody::Fixed);
         cmd.insert(Collider::cuboid(0.25 * GRANULARITY, 0.5 * GRANULARITY));
         cmd.insert(Sensor(true));
-    }
+    });
+}
 
-    fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut bevy_egui_kbgp::egui::Ui) {
-        position_edit(ctx, ui, &mut self.position, 1, 1);
-        color_code_edit(ui, &mut self.color_code);
-    }
+fn edit(mut edit: YoleckEdit<Crystal>) {
+    edit.edit(|ctx, data, ui| {
+        position_edit(ctx, ui, &mut data.position, 1, 1);
+        color_code_edit(ui, &mut data.color_code);
+    });
 }
 
 fn update_crystals_activation(

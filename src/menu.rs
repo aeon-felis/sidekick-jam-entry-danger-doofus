@@ -217,9 +217,9 @@ fn level_completed_menu(
         let just_completed = level_progress.just_completed.as_ref().unwrap();
         ui.label(
             egui::RichText::new(format!("Finished {:?}", format_level_name(just_completed)))
-            .color(egui::Color32::WHITE)
-            .background_color(egui::Color32::BLACK)
-            .text_style(egui::TextStyle::Heading),
+                .color(egui::Color32::WHITE)
+                .background_color(egui::Color32::BLACK)
+                .text_style(egui::TextStyle::Heading),
         );
         ui.add_space(8.0);
         if let Some(current_level) = &level_progress.current_level {

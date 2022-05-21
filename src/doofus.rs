@@ -1,8 +1,6 @@
-use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
-use bevy_egui::egui;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::YoleckSource;
+use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{
@@ -15,11 +13,16 @@ pub struct DoofusPlugin;
 
 impl Plugin for DoofusPlugin {
     fn build(&self, app: &mut App) {
+        app.add_yoleck_handler({
+            YoleckTypeHandlerFor::<Doofus>::new("Doofus")
+                .populate_with(populate)
+                .edit_with(edit)
+        });
         app.add_system_set(SystemSet::on_update(AppState::Game).with_system(propel_doofus));
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Doofus {
     #[serde(default)]
     position: Vec2,
@@ -27,19 +30,19 @@ pub struct Doofus {
     facing: Facing,
 }
 
-impl YoleckSource for Doofus {
-    fn populate(&self, ctx: &bevy_yoleck::YoleckPopulateContext, cmd: &mut EntityCommands) {
+fn populate(mut populate: YoleckPopulate<Doofus>, asset_server: Res<AssetServer>) {
+    populate.populate(|_ctx, data, mut cmd| {
         cmd.insert(IsDoofus);
         cmd.insert(IsCrystalActivator);
-        cmd.insert(self.facing);
+        cmd.insert(data.facing);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(self.position.extend(0.0), 1, 1),
+            transform: position_to_transform(data.position.extend(0.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
-                flip_x: self.facing == Facing::Left,
+                flip_x: data.facing == Facing::Left,
                 ..Default::default()
             },
-            texture: ctx.asset_server.load("sprites/doofus.png"),
+            texture: asset_server.load("sprites/doofus.png"),
             ..Default::default()
         });
         cmd.insert(RigidBody::Dynamic);
@@ -48,12 +51,14 @@ impl YoleckSource for Doofus {
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
         cmd.insert(Velocity::default());
         cmd.insert(LockedAxes::ROTATION_LOCKED);
-    }
+    });
+}
 
-    fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut egui::Ui) {
-        position_edit(ctx, ui, &mut self.position, 1, 1);
-        facing_edit(ui, &mut self.facing);
-    }
+fn edit(mut edit: YoleckEdit<Doofus>) {
+    edit.edit(|ctx, data, ui| {
+        position_edit(ctx, ui, &mut data.position, 1, 1);
+        facing_edit(ui, &mut data.facing);
+    });
 }
 
 fn propel_doofus(

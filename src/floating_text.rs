@@ -1,10 +1,22 @@
 use bevy::prelude::*;
-use bevy_yoleck::{egui, YoleckSource};
+use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::yoleck_utils::GRANULARITY;
 
-#[derive(Serialize, Deserialize)]
+pub struct FloatingTextPlugin;
+
+impl Plugin for FloatingTextPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_yoleck_handler({
+            YoleckTypeHandlerFor::<FloatingText>::new("FloatingText")
+                .populate_with(populate)
+                .edit_with(edit)
+        });
+    }
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct FloatingText {
     #[serde(default)]
     position: Vec2,
@@ -18,17 +30,13 @@ fn default_scale() -> f32 {
     0.05
 }
 
-impl YoleckSource for FloatingText {
-    fn populate(
-        &self,
-        ctx: &bevy_yoleck::YoleckPopulateContext,
-        cmd: &mut bevy::ecs::system::EntityCommands,
-    ) {
+fn populate(mut populate: YoleckPopulate<FloatingText>, asset_server: Res<AssetServer>) {
+    populate.populate(|ctx, data, mut cmd| {
         if ctx.is_in_editor() {
             cmd.insert_bundle(SpriteBundle {
                 sprite: Sprite {
                     color: Color::rgba(0.0, 0.0, 0.0, 0.5),
-                    custom_size: Some(Vec2::ONE * GRANULARITY / self.scale),
+                    custom_size: Some(Vec2::ONE * GRANULARITY / data.scale),
                     ..Default::default()
                 },
                 ..Default::default()
@@ -37,9 +45,9 @@ impl YoleckSource for FloatingText {
         cmd.insert_bundle(Text2dBundle {
             text: {
                 Text::with_section(
-                    self.text.clone(),
+                    data.text.clone(),
                     TextStyle {
-                        font: ctx.asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: 72.0,
                         color: Color::WHITE,
                     },
@@ -49,31 +57,33 @@ impl YoleckSource for FloatingText {
                 )
             },
             transform: Transform {
-                translation: self.position.extend(10.0),
+                translation: data.position.extend(10.0),
                 rotation: Default::default(),
-                scale: Vec3::new(self.scale, self.scale, 1.0),
+                scale: Vec3::new(data.scale, data.scale, 1.0),
             },
             ..Default::default()
         });
-    }
+    });
+}
 
-    fn edit(&mut self, ctx: &bevy_yoleck::YoleckEditContext, ui: &mut egui::Ui) {
+fn edit(mut edit: YoleckEdit<FloatingText>) {
+    edit.edit(|ctx, data, ui| {
         if let Some(pos) = ctx.get_passed_data::<Vec2>() {
-            self.position = *pos;
+            data.position = *pos;
         }
         ui.horizontal(|ui| {
             ui.add(
-                egui::DragValue::new(&mut self.position.x)
+                egui::DragValue::new(&mut data.position.x)
                     .prefix("X:")
                     .speed(0.05),
             );
             ui.add(
-                egui::DragValue::new(&mut self.position.y)
+                egui::DragValue::new(&mut data.position.y)
                     .prefix("Y:")
                     .speed(0.05),
             );
         });
-        ui.text_edit_multiline(&mut self.text);
-        ui.add(egui::Slider::new(&mut self.scale, 0.005..=0.05).logarithmic(true));
-    }
+        ui.text_edit_multiline(&mut data.text);
+        ui.add(egui::Slider::new(&mut data.scale, 0.005..=0.05).logarithmic(true));
+    });
 }
