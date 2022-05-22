@@ -6,7 +6,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsPlatform;
-use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
+use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
 pub struct ArenaPlugin;
 
@@ -15,6 +15,10 @@ impl Plugin for ArenaPlugin {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<Block>::new("Block")
                 .populate_with(populate)
+                .with(position_adapter(
+                    |block: &mut Block| (&mut block.position, block.width, block.height),
+                    0.0,
+                ))
                 .edit_with(edit)
         });
     }
@@ -43,7 +47,6 @@ fn populate(mut populate: YoleckPopulate<Block>, asset_server: Res<AssetServer>)
             data.height as f32 * GRANULARITY,
         );
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(data.position.extend(0.0), data.width, data.height),
             sprite: Sprite {
                 color: Color::NONE,
                 custom_size: Some(size),
@@ -82,8 +85,7 @@ fn populate(mut populate: YoleckPopulate<Block>, asset_server: Res<AssetServer>)
 }
 
 fn edit(mut edit: YoleckEdit<Block>) {
-    edit.edit(|ctx, data, ui| {
-        position_edit(ctx, ui, &mut data.position, data.width, data.height);
+    edit.edit(|_ctx, data, ui| {
         data.prev_dimenstions = [data.width, data.height];
         ui.horizontal(|ui| {
             for (caption, value) in [("Width:", &mut data.width), ("Height:", &mut data.height)] {

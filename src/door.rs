@@ -5,12 +5,12 @@ use bevy_rapier2d::prelude::*;
 use bevy_rapier2d::rapier::prelude::CollisionEventFlags;
 use bevy_tweening::lens::{TransformPositionLens, TransformScaleLens};
 use bevy_tweening::*;
-use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, IsDoofus, IsDoor, TweenCompletedCode};
 use crate::utils::{entities_ordered_by_type, some_or};
-use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
+use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
 pub struct DoorPlugin;
 
@@ -19,7 +19,10 @@ impl Plugin for DoorPlugin {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<Door>::new("Door")
                 .populate_with(populate)
-                .edit_with(edit)
+                .with(position_adapter(
+                    |door: &mut Door| (&mut door.position, 1, 1),
+                    -1.0,
+                ))
         });
         app.add_system_set({
             SystemSet::on_update(AppState::Game)
@@ -36,10 +39,9 @@ pub struct Door {
 }
 
 fn populate(mut populate: YoleckPopulate<Door>, asset_server: Res<AssetServer>) {
-    populate.populate(|_ctx, data, mut cmd| {
+    populate.populate(|_ctx, _data, mut cmd| {
         cmd.insert(IsDoor);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(data.position.extend(-1.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 ..Default::default()
@@ -50,12 +52,6 @@ fn populate(mut populate: YoleckPopulate<Door>, asset_server: Res<AssetServer>) 
         cmd.insert(RigidBody::Fixed);
         cmd.insert(Collider::cuboid(0.25 * GRANULARITY, 0.5 * GRANULARITY));
         cmd.insert(Sensor(true));
-    });
-}
-
-fn edit(mut edit: YoleckEdit<Door>) {
-    edit.edit(|ctx, data, ui| {
-        position_edit(ctx, ui, &mut data.position, 1, 1);
     });
 }
 

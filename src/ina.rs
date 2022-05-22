@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{IsCrystalActivator, IsIna, IsSpringBoard};
 use crate::player_control::PlayerControl;
-use crate::yoleck_utils::{position_edit, position_to_transform, GRANULARITY};
+use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
 pub struct InaPlugin;
 
@@ -14,7 +14,10 @@ impl Plugin for InaPlugin {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<Ina>::new("Ina")
                 .populate_with(populate)
-                .edit_with(edit)
+                .with(position_adapter(
+                    |ina: &mut Ina| (&mut ina.position, 1, 1),
+                    0.0,
+                ))
         });
     }
 }
@@ -26,12 +29,11 @@ pub struct Ina {
 }
 
 fn populate(mut populate: YoleckPopulate<Ina>, asset_server: Res<AssetServer>) {
-    populate.populate(|_ctx, data, mut cmd| {
+    populate.populate(|_ctx, _data, mut cmd| {
         cmd.insert(IsIna);
         cmd.insert(IsCrystalActivator);
         cmd.insert(IsSpringBoard);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(data.position.extend(0.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 ..Default::default()
@@ -46,11 +48,5 @@ fn populate(mut populate: YoleckPopulate<Ina>, asset_server: Res<AssetServer>) {
         cmd.insert(Velocity::default());
         cmd.insert(LockedAxes::ROTATION_LOCKED);
         cmd.insert(PlayerControl::default());
-    });
-}
-
-fn edit(mut edit: YoleckEdit<Ina>) {
-    edit.edit(|ctx, data, ui| {
-        position_edit(ctx, ui, &mut data.position, 1, 1);
     });
 }

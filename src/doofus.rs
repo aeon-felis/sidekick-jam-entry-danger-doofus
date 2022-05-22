@@ -7,7 +7,7 @@ use crate::global_types::{
     AppState, Facing, IsCrystalActivator, IsDoofus, IsPlatform, IsSpringBoard,
 };
 use crate::utils::{entities_ordered_by_type, some_or};
-use crate::yoleck_utils::{facing_edit, position_edit, position_to_transform, GRANULARITY};
+use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
 pub struct DoofusPlugin;
 
@@ -16,6 +16,10 @@ impl Plugin for DoofusPlugin {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<Doofus>::new("Doofus")
                 .populate_with(populate)
+                .with(position_adapter(
+                    |doofus: &mut Doofus| (&mut doofus.position, 1, 1),
+                    0.0,
+                ))
                 .edit_with(edit)
         });
         app.add_system_set(SystemSet::on_update(AppState::Game).with_system(propel_doofus));
@@ -36,7 +40,6 @@ fn populate(mut populate: YoleckPopulate<Doofus>, asset_server: Res<AssetServer>
         cmd.insert(IsCrystalActivator);
         cmd.insert(data.facing);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(data.position.extend(0.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 flip_x: data.facing == Facing::Left,
@@ -55,9 +58,12 @@ fn populate(mut populate: YoleckPopulate<Doofus>, asset_server: Res<AssetServer>
 }
 
 fn edit(mut edit: YoleckEdit<Doofus>) {
-    edit.edit(|ctx, data, ui| {
-        position_edit(ctx, ui, &mut data.position, 1, 1);
-        facing_edit(ui, &mut data.facing);
+    edit.edit(|_ctx, data, ui| {
+        ui.horizontal(|ui| {
+            ui.label("Facing:");
+            ui.selectable_value(&mut data.facing, Facing::Left, "<-");
+            ui.selectable_value(&mut data.facing, Facing::Right, "->");
+        });
     });
 }
 

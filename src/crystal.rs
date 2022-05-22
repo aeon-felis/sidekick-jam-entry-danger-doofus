@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{ColorCode, CrystalState, IsCrystalActivator, IsPlatform};
 use crate::utils::{entities_ordered_by_type, some_or};
-use crate::yoleck_utils::{color_code_edit, position_edit, position_to_transform, GRANULARITY};
+use crate::yoleck_utils::{color_code_adapter, position_adapter, GRANULARITY};
 
 pub struct CrystalPlugin;
 
@@ -14,7 +14,13 @@ impl Plugin for CrystalPlugin {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<Crystal>::new("Crystal")
                 .populate_with(populate)
-                .edit_with(edit)
+                .with(position_adapter(
+                    |crystal: &mut Crystal| (&mut crystal.position, 1, 1),
+                    -1.0,
+                ))
+                .with(color_code_adapter(|crystal: &mut Crystal| {
+                    &mut crystal.color_code
+                }))
         });
         app.add_system(update_crystals_activation);
     }
@@ -34,7 +40,6 @@ fn populate(mut populate: YoleckPopulate<Crystal>, asset_server: Res<AssetServer
         cmd.insert(data.color_code);
         cmd.insert(IsPlatform);
         cmd.insert_bundle(SpriteBundle {
-            transform: position_to_transform(data.position.extend(-1.0), 1, 1),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 color: data.color_code.bevy_color(),
@@ -46,13 +51,6 @@ fn populate(mut populate: YoleckPopulate<Crystal>, asset_server: Res<AssetServer
         cmd.insert(RigidBody::Fixed);
         cmd.insert(Collider::cuboid(0.25 * GRANULARITY, 0.5 * GRANULARITY));
         cmd.insert(Sensor(true));
-    });
-}
-
-fn edit(mut edit: YoleckEdit<Crystal>) {
-    edit.edit(|ctx, data, ui| {
-        position_edit(ctx, ui, &mut data.position, 1, 1);
-        color_code_edit(ui, &mut data.color_code);
     });
 }
 

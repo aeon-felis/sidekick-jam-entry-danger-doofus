@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, ColorCode, CrystalState, GateState, IsPlatform};
-use crate::yoleck_utils::{color_code_edit, position_edit, position_to_transform, GRANULARITY};
+use crate::yoleck_utils::{color_code_adapter, position_adapter, GRANULARITY};
 
 pub struct GatePlugin;
 
@@ -13,7 +13,11 @@ impl Plugin for GatePlugin {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<Gate>::new("Gate")
                 .populate_with(populate)
-                .edit_with(edit)
+                .with(position_adapter(
+                    |gate: &mut Gate| (&mut gate.position, 1, 1),
+                    -1.0,
+                ))
+                .with(color_code_adapter(|gate: &mut Gate| &mut gate.color_code))
         });
         app.add_system(update_gates_status);
         app.add_system_set(SystemSet::on_update(AppState::Game).with_system(move_gates));
@@ -30,12 +34,15 @@ pub struct Gate {
 
 fn populate(mut populate: YoleckPopulate<Gate>, asset_server: Res<AssetServer>) {
     populate.populate(|_ctx, data, mut cmd| {
-        let transform = position_to_transform(data.position.extend(-1.0), 1, 1);
+        let transform = Transform::from_xyz(
+            data.position.x + 0.5 * GRANULARITY,
+            data.position.y + 0.5 * GRANULARITY,
+            -1.0,
+        );
         cmd.insert(GateState {
             y_when_closed: transform.translation.y,
             is_open: false,
         });
-        cmd.insert(data.color_code);
         cmd.insert(IsPlatform);
         cmd.insert_bundle(SpriteBundle {
             transform,
@@ -49,13 +56,6 @@ fn populate(mut populate: YoleckPopulate<Gate>, asset_server: Res<AssetServer>) 
         });
         cmd.insert(RigidBody::KinematicPositionBased);
         cmd.insert(Collider::cuboid(0.5 * GRANULARITY, 0.5 * GRANULARITY));
-    });
-}
-
-fn edit(mut edit: YoleckEdit<Gate>) {
-    edit.edit(|ctx, data, ui| {
-        position_edit(ctx, ui, &mut data.position, 1, 1);
-        color_code_edit(ui, &mut data.color_code);
     });
 }
 

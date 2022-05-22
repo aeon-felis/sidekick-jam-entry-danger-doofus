@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_yoleck::tools_2d::handle_position_fixed_z;
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
@@ -10,6 +11,10 @@ impl Plugin for FloatingTextPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<FloatingText>::new("FloatingText")
+                .with(handle_position_fixed_z(
+                    |text: &mut FloatingText| &mut text.position,
+                    10.0,
+                ))
                 .populate_with(populate)
                 .edit_with(edit)
         });
@@ -67,22 +72,7 @@ fn populate(mut populate: YoleckPopulate<FloatingText>, asset_server: Res<AssetS
 }
 
 fn edit(mut edit: YoleckEdit<FloatingText>) {
-    edit.edit(|ctx, data, ui| {
-        if let Some(pos) = ctx.get_passed_data::<Vec2>() {
-            data.position = *pos;
-        }
-        ui.horizontal(|ui| {
-            ui.add(
-                egui::DragValue::new(&mut data.position.x)
-                    .prefix("X:")
-                    .speed(0.05),
-            );
-            ui.add(
-                egui::DragValue::new(&mut data.position.y)
-                    .prefix("Y:")
-                    .speed(0.05),
-            );
-        });
+    edit.edit(|_ctx, data, ui| {
         ui.text_edit_multiline(&mut data.text);
         ui.add(egui::Slider::new(&mut data.scale, 0.005..=0.05).logarithmic(true));
     });
