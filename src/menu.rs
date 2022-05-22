@@ -6,6 +6,7 @@ use bevy_yoleck::YoleckLevelIndex;
 
 use crate::global_types::LevelProgress;
 use crate::global_types::{AppState, MenuState};
+use crate::loading::GameAssets;
 use crate::utils::some_or;
 use crate::MenuActionForKbgp;
 
@@ -114,6 +115,7 @@ fn level_select_menu(
     mut egui_context: ResMut<EguiContext>,
     mut state: ResMut<State<AppState>>,
     mut level_progress: ResMut<LevelProgress>,
+    game_assets: Res<GameAssets>,
     level_index_assets: Res<Assets<YoleckLevelIndex>>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
@@ -124,7 +126,7 @@ fn level_select_menu(
             .button("Back To Menu")
             .kbgp_navigation()
             .kbgp_focus_label(FocusLabel::BackToMainMenu);
-        let level_index = level_index_assets.get(&level_progress.level_index_handle);
+        let level_index = level_index_assets.get(&game_assets.level_index);
         if level_index
             .map(|level_index| level_index.len() < level_progress.num_levels_available)
             .unwrap_or(true)

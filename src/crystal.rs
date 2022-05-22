@@ -4,6 +4,7 @@ use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{ColorCode, CrystalState, IsCrystalActivator, IsPlatform};
+use crate::loading::GameAssets;
 use crate::utils::{entities_ordered_by_type, some_or};
 use crate::yoleck_utils::{color_code_adapter, position_adapter, GRANULARITY};
 
@@ -34,7 +35,7 @@ pub struct Crystal {
     color_code: ColorCode,
 }
 
-fn populate(mut populate: YoleckPopulate<Crystal>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<Crystal>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, data, mut cmd| {
         cmd.insert(CrystalState { num_activators: 0 });
         cmd.insert(data.color_code);
@@ -45,7 +46,7 @@ fn populate(mut populate: YoleckPopulate<Crystal>, asset_server: Res<AssetServer
                 color: data.color_code.bevy_color(),
                 ..Default::default()
             },
-            texture: asset_server.load("sprites/crystal-off.png"),
+            texture: game_assets.crystal_off.clone(),
             ..Default::default()
         });
         cmd.insert(RigidBody::Fixed);
@@ -58,7 +59,7 @@ fn update_crystals_activation(
     mut collision_events: EventReader<CollisionEvent>,
     mut crystal_query: Query<(&mut CrystalState, &mut Handle<Image>)>,
     activator_query: Query<(), With<IsCrystalActivator>>,
-    asset_server: Res<AssetServer>,
+    game_assets: Res<GameAssets>,
 ) {
     for collision_event in collision_events.iter() {
         let (entity1, entity2, intersection_started) = match collision_event {
@@ -75,14 +76,14 @@ fn update_crystals_activation(
         if intersection_started {
             crystal_state.num_activators += 1;
             if crystal_state.num_activators == 1 {
-                *crystal_texture = asset_server.load("sprites/crystal-on.png");
+                *crystal_texture = game_assets.crystal_on.clone();
             }
         } else {
             if 0 < crystal_state.num_activators {
                 crystal_state.num_activators -= 1;
             }
             if crystal_state.num_activators == 0 {
-                *crystal_texture = asset_server.load("sprites/crystal-off.png");
+                *crystal_texture = game_assets.crystal_off.clone();
             }
         }
     }

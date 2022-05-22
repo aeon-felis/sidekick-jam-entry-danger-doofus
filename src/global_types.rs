@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_yoleck::{egui, YoleckLevelIndex};
+use bevy_yoleck::egui;
 use ezinput::prelude::BindingTypeView;
 use ezinput_macros::BindingTypeView;
 use serde::{Deserialize, Serialize};
@@ -29,7 +29,6 @@ pub enum MenuState {
 pub struct LevelProgress {
     pub just_completed: Option<String>,
     pub current_level: Option<String>,
-    pub level_index_handle: Handle<YoleckLevelIndex>,
     pub num_levels_available: usize,
 }
 

@@ -3,6 +3,7 @@ use bevy_yoleck::tools_2d::handle_position_fixed_z;
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
+use crate::loading::GameAssets;
 use crate::yoleck_utils::GRANULARITY;
 
 pub struct FloatingTextPlugin;
@@ -35,7 +36,7 @@ fn default_scale() -> f32 {
     0.05
 }
 
-fn populate(mut populate: YoleckPopulate<FloatingText>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<FloatingText>, game_assets: Res<GameAssets>) {
     populate.populate(|ctx, data, mut cmd| {
         if ctx.is_in_editor() {
             cmd.insert_bundle(SpriteBundle {
@@ -52,7 +53,7 @@ fn populate(mut populate: YoleckPopulate<FloatingText>, asset_server: Res<AssetS
                 Text::with_section(
                     data.text.clone(),
                     TextStyle {
-                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font: game_assets.font.clone(),
                         font_size: 72.0,
                         color: Color::WHITE,
                     },

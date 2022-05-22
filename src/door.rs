@@ -9,6 +9,7 @@ use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, IsDoofus, IsDoor, TweenCompletedCode};
+use crate::loading::GameAssets;
 use crate::utils::{entities_ordered_by_type, some_or};
 use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
@@ -38,7 +39,7 @@ pub struct Door {
     position: Vec2,
 }
 
-fn populate(mut populate: YoleckPopulate<Door>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<Door>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, _data, mut cmd| {
         cmd.insert(IsDoor);
         cmd.insert_bundle(SpriteBundle {
@@ -46,7 +47,7 @@ fn populate(mut populate: YoleckPopulate<Door>, asset_server: Res<AssetServer>) 
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 ..Default::default()
             },
-            texture: asset_server.load("sprites/door.png"),
+            texture: game_assets.door.clone(),
             ..Default::default()
         });
         cmd.insert(RigidBody::Fixed);

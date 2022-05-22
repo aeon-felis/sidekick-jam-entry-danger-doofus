@@ -3,6 +3,7 @@ use bevy_pkv::PkvStore;
 use bevy_yoleck::YoleckLevelIndex;
 
 use crate::global_types::{AppState, LevelProgress, MenuState};
+use crate::loading::GameAssets;
 use crate::utils::some_or;
 
 pub struct LevelProgressPlugin;
@@ -12,10 +13,8 @@ impl Plugin for LevelProgressPlugin {
         app.insert_resource(LevelProgress {
             just_completed: None,
             current_level: None,
-            level_index_handle: Default::default(),
             num_levels_available: 0,
         });
-        app.add_startup_system(setup_level_progress);
         app.add_system(read_last_finished_level);
         app.add_system_set(
             SystemSet::on_update(AppState::LevelCompleted).with_system(handle_level_completion),
@@ -23,23 +22,19 @@ impl Plugin for LevelProgressPlugin {
     }
 }
 
-fn setup_level_progress(asset_server: Res<AssetServer>, mut level_progress: ResMut<LevelProgress>) {
-    level_progress.level_index_handle = asset_server.load("levels/index.yoli");
-}
-
 const LEVEL_PKV_KEY: &str = "completed_up_to_level";
 
 fn read_last_finished_level(
     pkv: Res<PkvStore>,
     mut level_progress: ResMut<LevelProgress>,
+    game_assets: Res<GameAssets>,
     level_index_assets: Res<Assets<YoleckLevelIndex>>,
 ) {
     if 0 < level_progress.num_levels_available {
         return;
     }
     if let Ok(completed_up_to_level) = pkv.get::<String>(LEVEL_PKV_KEY) {
-        let level_index =
-            some_or!(level_index_assets.get(&level_progress.level_index_handle); return);
+        let level_index = some_or!(level_index_assets.get(&game_assets.level_index); return);
         if let Some(index) = level_index.iter().enumerate().find_map(|(index, level)| {
             if level.filename == completed_up_to_level {
                 Some(index)
@@ -61,6 +56,7 @@ fn read_last_finished_level(
 }
 
 fn handle_level_completion(
+    game_assets: Res<GameAssets>,
     level_index_assets: Res<Assets<YoleckLevelIndex>>,
     mut pkv: ResMut<PkvStore>,
     mut level_progress: ResMut<LevelProgress>,
@@ -70,7 +66,7 @@ fn handle_level_completion(
         level_progress.current_level.as_ref();
         return // level completed inside editor
     );
-    let level_index = some_or!(level_index_assets.get(&level_progress.level_index_handle); return);
+    let level_index = some_or!(level_index_assets.get(&game_assets.level_index); return);
     let mut it = level_index.iter();
 
     let is_new_level_better = if let Ok(best_completed) = pkv.get::<String>(LEVEL_PKV_KEY) {

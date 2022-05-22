@@ -4,6 +4,7 @@ use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, ColorCode, CrystalState, GateState, IsPlatform};
+use crate::loading::GameAssets;
 use crate::yoleck_utils::{color_code_adapter, position_adapter, GRANULARITY};
 
 pub struct GatePlugin;
@@ -32,7 +33,7 @@ pub struct Gate {
     color_code: ColorCode,
 }
 
-fn populate(mut populate: YoleckPopulate<Gate>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<Gate>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, data, mut cmd| {
         let transform = Transform::from_xyz(
             data.position.x + 0.5 * GRANULARITY,
@@ -51,7 +52,7 @@ fn populate(mut populate: YoleckPopulate<Gate>, asset_server: Res<AssetServer>) 
                 color: data.color_code.bevy_color(),
                 ..Default::default()
             },
-            texture: asset_server.load("sprites/gate.png"),
+            texture: game_assets.gate.clone(),
             ..Default::default()
         });
         cmd.insert(RigidBody::KinematicPositionBased);

@@ -4,6 +4,7 @@ use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{IsCrystalActivator, IsIna, IsSpringBoard};
+use crate::loading::GameAssets;
 use crate::player_control::PlayerControl;
 use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
@@ -28,7 +29,7 @@ pub struct Ina {
     position: Vec2,
 }
 
-fn populate(mut populate: YoleckPopulate<Ina>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<Ina>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, _data, mut cmd| {
         cmd.insert(IsIna);
         cmd.insert(IsCrystalActivator);
@@ -38,7 +39,7 @@ fn populate(mut populate: YoleckPopulate<Ina>, asset_server: Res<AssetServer>) {
                 custom_size: Some(Vec2::new(GRANULARITY, GRANULARITY)),
                 ..Default::default()
             },
-            texture: asset_server.load("sprites/ina.png"),
+            texture: game_assets.ina.clone(),
             ..Default::default()
         });
         cmd.insert(RigidBody::Dynamic);

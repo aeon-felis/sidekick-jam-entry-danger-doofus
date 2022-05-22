@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::global_types::{
     AppState, Facing, IsCrystalActivator, IsDoofus, IsPlatform, IsSpringBoard,
 };
+use crate::loading::GameAssets;
 use crate::utils::{entities_ordered_by_type, some_or};
 use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
@@ -34,7 +35,7 @@ pub struct Doofus {
     facing: Facing,
 }
 
-fn populate(mut populate: YoleckPopulate<Doofus>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<Doofus>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, data, mut cmd| {
         cmd.insert(IsDoofus);
         cmd.insert(IsCrystalActivator);
@@ -45,7 +46,7 @@ fn populate(mut populate: YoleckPopulate<Doofus>, asset_server: Res<AssetServer>
                 flip_x: data.facing == Facing::Left,
                 ..Default::default()
             },
-            texture: asset_server.load("sprites/doofus.png"),
+            texture: game_assets.doofus.clone(),
             ..Default::default()
         });
         cmd.insert(RigidBody::Dynamic);

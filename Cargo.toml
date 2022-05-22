@@ -46,6 +46,7 @@ clap = { version = "3.1.17", features = ["derive"] }
 bevy_tweening = "0.4.0"
 #bevy_pkv = "0.4.0"
 bevy_pkv = { git = "https://github.com/johanhelsing/bevy_pkv.git", rev = "02c18d117ff7a299ac6e439549aba242b81887bb" }
+bevy_asset_loader = "0.10.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "0.25", features=["x11"]}

@@ -6,6 +6,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsPlatform;
+use crate::loading::GameAssets;
 use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
 pub struct ArenaPlugin;
@@ -40,7 +41,7 @@ fn the_fucking_number_one_why_cant_serde_accept_literals() -> usize {
     1
 }
 
-fn populate(mut populate: YoleckPopulate<Block>, asset_server: Res<AssetServer>) {
+fn populate(mut populate: YoleckPopulate<Block>, game_assets: Res<GameAssets>) {
     populate.populate(|ctx, data, mut cmd| {
         let size = Vec2::new(
             data.width as f32 * GRANULARITY,
@@ -75,7 +76,7 @@ fn populate(mut populate: YoleckPopulate<Block>, asset_server: Res<AssetServer>)
                             custom_size: Some(Vec2::ONE * GRANULARITY),
                             ..Default::default()
                         },
-                        texture: asset_server.load("sprites/block-tile.png"),
+                        texture: game_assets.block_tile.clone(),
                         ..Default::default()
                     });
                 }
