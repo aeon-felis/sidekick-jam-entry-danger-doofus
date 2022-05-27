@@ -1,10 +1,9 @@
 use bevy::prelude::*;
-use bevy_yoleck::tools_2d::handle_position_fixed_z;
+use bevy_yoleck::editools_2d::position_edit_adapter;
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
 use serde::{Deserialize, Serialize};
 
 use crate::loading::GameAssets;
-use crate::yoleck_utils::GRANULARITY;
 
 pub struct FloatingTextPlugin;
 
@@ -12,10 +11,7 @@ impl Plugin for FloatingTextPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
             YoleckTypeHandlerFor::<FloatingText>::new("FloatingText")
-                .with(handle_position_fixed_z(
-                    |text: &mut FloatingText| &mut text.position,
-                    10.0,
-                ))
+                .with(position_edit_adapter(|text: &mut FloatingText| bevy_yoleck::editools_2d::Transform2dProjection { translation: &mut text.position }))
                 .populate_with(populate)
                 .edit_with(edit)
         });
@@ -38,20 +34,15 @@ fn default_scale() -> f32 {
 
 fn populate(mut populate: YoleckPopulate<FloatingText>, game_assets: Res<GameAssets>) {
     populate.populate(|ctx, data, mut cmd| {
-        if ctx.is_in_editor() {
-            cmd.insert_bundle(SpriteBundle {
-                sprite: Sprite {
-                    color: Color::rgba(0.0, 0.0, 0.0, 0.5),
-                    custom_size: Some(Vec2::ONE * GRANULARITY / data.scale),
-                    ..Default::default()
-                },
-                ..Default::default()
-            });
-        }
+        let text = if ctx.is_in_editor() && data.text.trim_start().is_empty() {
+            "<<TEXT>>".to_owned()
+        } else {
+            data.text.clone()
+        };
         cmd.insert_bundle(Text2dBundle {
             text: {
                 Text::with_section(
-                    data.text.clone(),
+                    text,
                     TextStyle {
                         font: game_assets.font.clone(),
                         font_size: 72.0,

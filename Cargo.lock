@@ -278,7 +278,7 @@ dependencies = [
 [[package]]
 name = "bevy-yoleck"
 version = "0.1.0"
-source = "git+https://github.com/idanarye/bevy-yoleck.git#a70fdba212d2eda7f8e1be179487c39fc496f557"
+source = "git+https://github.com/idanarye/bevy-yoleck.git#0833259890d0240e08e5be3186bb1486df416fc1"
 dependencies = [
  "anyhow",
  "bevy",
@@ -4180,7 +4180,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc6a3cffdb686fbb24d9fb8f03a213803277ed2300f11026a3afe1f108dc021b"
 dependencies = [
  "jni",
- "ndk-glue 0.6.2",
+ "ndk-glue 0.3.0",
  "url",
  "web-sys",
  "widestring",

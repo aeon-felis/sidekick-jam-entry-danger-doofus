@@ -38,7 +38,7 @@ fn main() {
     app.add_plugin(bevy_yoleck::bevy_egui::EguiPlugin);
     if args.editor {
         app.add_plugin(bevy_yoleck::YoleckPluginForEditor);
-        app.add_plugin(bevy_yoleck::tools_2d::YoleckTools2dPlugin);
+        app.add_plugin(bevy_yoleck::editools_2d::YoleckEditools2dPlugin);
     } else {
         app.add_plugin(bevy_yoleck::YoleckPluginForGame);
         app.insert_resource(bevy_egui::EguiSettings {
