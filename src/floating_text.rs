@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy_yoleck::editools_2d::position_edit_adapter;
-use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::vpeol_2d::yoleck_vpeol_position_edit_adapter;
+use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::loading::GameAssets;
@@ -10,8 +10,14 @@ pub struct FloatingTextPlugin;
 impl Plugin for FloatingTextPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<FloatingText>::new("FloatingText")
-                .with(position_edit_adapter(|text: &mut FloatingText| bevy_yoleck::editools_2d::Transform2dProjection { translation: &mut text.position }))
+            YoleckTypeHandler::<FloatingText>::new("FloatingText")
+                .with(yoleck_vpeol_position_edit_adapter(
+                    |text: &mut FloatingText| {
+                        bevy_yoleck::vpeol_2d::YoleckVpeolTransform2dProjection {
+                            translation: &mut text.position,
+                        }
+                    },
+                ))
                 .populate_with(populate)
                 .edit_with(edit)
         });

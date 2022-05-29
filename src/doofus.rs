@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{
@@ -15,7 +15,7 @@ pub struct DoofusPlugin;
 impl Plugin for DoofusPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<Doofus>::new("Doofus")
+            YoleckTypeHandler::<Doofus>::new("Doofus")
                 .populate_with(populate)
                 .with(position_adapter(
                     |doofus: &mut Doofus| (&mut doofus.position, 1, 1),

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_egui::egui;
-use bevy_yoleck::{YoleckEdit, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckEdit, YoleckPopulate, YoleckTypeHandler};
 
 use crate::global_types::ColorCode;
 
@@ -17,7 +17,7 @@ pub fn round_vec2_to_tick(vec: Vec2, tick: f32) -> Vec2 {
 pub fn position_adapter<T: 'static>(
     projection: impl 'static + Clone + Send + Sync + Fn(&mut T) -> (&mut Vec2, usize, usize),
     z: f32,
-) -> impl FnOnce(YoleckTypeHandlerFor<T>) -> YoleckTypeHandlerFor<T> {
+) -> impl FnOnce(YoleckTypeHandler<T>) -> YoleckTypeHandler<T> {
     move |handler| {
         handler
             .populate_with({
@@ -61,7 +61,7 @@ pub fn position_adapter<T: 'static>(
 
 pub fn color_code_adapter<T: 'static>(
     projection: impl 'static + Clone + Send + Sync + Fn(&mut T) -> &mut ColorCode,
-) -> impl FnOnce(YoleckTypeHandlerFor<T>) -> YoleckTypeHandlerFor<T> {
+) -> impl FnOnce(YoleckTypeHandler<T>) -> YoleckTypeHandler<T> {
     move |handler| {
         handler
             .populate_with({

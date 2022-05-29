@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, ColorCode, CrystalState, GateState, IsPlatform};
@@ -12,7 +12,7 @@ pub struct GatePlugin;
 impl Plugin for GatePlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<Gate>::new("Gate")
+            YoleckTypeHandler::<Gate>::new("Gate")
                 .populate_with(populate)
                 .with(position_adapter(
                     |gate: &mut Gate| (&mut gate.position, 1, 1),

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::egui;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -14,7 +14,7 @@ pub struct ArenaPlugin;
 impl Plugin for ArenaPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<Block>::new("Block")
+            YoleckTypeHandler::<Block>::new("Block")
                 .populate_with(populate)
                 .with(position_adapter(
                     |block: &mut Block| (&mut block.position, block.width, block.height),

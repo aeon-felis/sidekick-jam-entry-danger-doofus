@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{IsCrystalActivator, IsIna, IsSpringBoard};
@@ -13,7 +13,7 @@ pub struct InaPlugin;
 impl Plugin for InaPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<Ina>::new("Ina")
+            YoleckTypeHandler::<Ina>::new("Ina")
                 .populate_with(populate)
                 .with(position_adapter(
                     |ina: &mut Ina| (&mut ina.position, 1, 1),

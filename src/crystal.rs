@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{ColorCode, CrystalState, IsCrystalActivator, IsPlatform};
@@ -13,7 +13,7 @@ pub struct CrystalPlugin;
 impl Plugin for CrystalPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<Crystal>::new("Crystal")
+            YoleckTypeHandler::<Crystal>::new("Crystal")
                 .populate_with(populate)
                 .with(position_adapter(
                     |crystal: &mut Crystal| (&mut crystal.position, 1, 1),

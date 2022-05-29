@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::*;
 use bevy_rapier2d::rapier::prelude::CollisionEventFlags;
 use bevy_tweening::lens::{TransformPositionLens, TransformScaleLens};
 use bevy_tweening::*;
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandlerFor};
+use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, IsDoofus, IsDoor, TweenCompletedCode};
@@ -18,7 +18,7 @@ pub struct DoorPlugin;
 impl Plugin for DoorPlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandlerFor::<Door>::new("Door")
+            YoleckTypeHandler::<Door>::new("Door")
                 .populate_with(populate)
                 .with(position_adapter(
                     |door: &mut Door| (&mut door.position, 1, 1),
