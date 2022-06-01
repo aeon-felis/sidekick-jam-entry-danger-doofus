@@ -32,7 +32,7 @@ def level(ctx):
     ctx.value(lambda level: level['filename'].removesuffix('.yol'))
     with local.path('assets/levels/index.yoli').open() as f:
         level_index = json.load(f)
-    for level in level_index:
+    for level in level_index[1]:
         yield level
 
 

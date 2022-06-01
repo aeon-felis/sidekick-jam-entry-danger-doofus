@@ -21,7 +21,9 @@ use crate::loading::LoadingPlugin;
 use bevy::app::App;
 use bevy::prelude::*;
 use bevy_rapier2d::plugin::RapierConfiguration;
-use bevy_yoleck::{YoleckEditorState, YoleckLoadingCommand, YoleckManaged};
+use bevy_yoleck::{
+    YoleckEditorState, YoleckLoadingCommand, YoleckManaged, YoleckSyncWithEditorState,
+};
 
 use self::animation_helpers::AnimationHelpersPlugin;
 use self::arena::ArenaPlugin;
@@ -46,14 +48,6 @@ pub struct GamePlugin {
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        if self.is_editor {
-            app.add_state(AppState::Editor);
-        } else {
-            app.add_state(AppState::Menu(MenuState::Main));
-        }
-        if !self.is_editor {
-            app.add_plugin(MenuPlugin);
-        }
         app.add_plugin(LoadingPlugin);
         app.add_plugin(CameraPlugin {
             is_editor: self.is_editor,
@@ -73,8 +67,13 @@ impl Plugin for GamePlugin {
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
-            app.add_system(set_app_state_based_on_editor_state);
+            app.add_plugin(YoleckSyncWithEditorState {
+                when_editor: AppState::Editor,
+                when_game: AppState::Game,
+            });
         } else {
+            app.add_plugin(MenuPlugin);
+            app.add_state(AppState::Menu(MenuState::Main));
             app.add_system_set(
                 SystemSet::on_enter(AppState::LoadLevel).with_system(handle_level_loading),
             );
@@ -90,16 +89,6 @@ impl Plugin for GamePlugin {
             }
         }
     }
-}
-
-fn set_app_state_based_on_editor_state(
-    yoleck_editor_state: Res<State<YoleckEditorState>>,
-    mut app_state: ResMut<State<AppState>>,
-) {
-    let _ = app_state.set(match yoleck_editor_state.current() {
-        YoleckEditorState::EditorActive => AppState::Editor,
-        YoleckEditorState::GameActive => AppState::Game,
-    });
 }
 
 fn enable_disable_physics(
