@@ -33,7 +33,7 @@ dev = [
 bevy = { version = "0.7", default-features = false }
 bevy_kira_audio = { version = "0.9" }
 rand = "0.8.3"
-bevy-yoleck = { git = "https://github.com/idanarye/bevy-yoleck.git", features = ["vpeol_2d"] }
+bevy-yoleck = { version = "0.1.0", features = ["vpeol_2d"] }
 serde = "1.0.137"
 bevy_rapier2d = "0.13.2"
 itertools = "0.10.3"
